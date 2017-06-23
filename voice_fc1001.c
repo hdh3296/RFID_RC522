@@ -13,6 +13,9 @@ date    :       1999,9,21
 #include        "RC_comm_4480\spi.h"
 
 #include        "Voice_Ext_IO_8.h"
+#include		"rc522.h"
+
+
 
 
 #define NormalBoard_DoorSlow	1 // ÀÏ¹ÝÇü º¸µå·Î µµ¾î ½½·Î¿ì Á¦¾î ±â´É »ç¿ë ½Ã(¸±·¹ÀÌ Ãâ·Â), È®ÀåIOº¸µå »ç¿ë½Ã¿¡´Â µðÆÄÀÎ ¸·¾Æ¾ß ÇÑ´Ù. 
@@ -419,8 +422,13 @@ void main(void)
     ei();
 
     InitVoice();
+
+	
     SetDipSW();
-    SetVoice(); // °¢Á¾ ¼ÂÆÃ ¿©ºÎ 
+
+
+
+	SetVoice(); // °¢Á¾ ¼ÂÆÃ ¿©ºÎ 
     if (bSetSong) bSetCarBtnVoice = FALSE;
 
 
@@ -1399,13 +1407,15 @@ void    HextoASCIIByte(void)
 void    TestVoicePlay(void)
 {
     unsigned bBusy;
+	uchar status;
+	uchar str[MAX_LEN];
 
     TmpCurVoice = 0;
     TestMentDelayTimer = 0;
     _VOICE_ACT = VOICE_ON;
 
 
-    for (; 1;)
+    for (;1;)
     {
         CLRWDT();
 
@@ -1420,7 +1430,22 @@ void    TestVoicePlay(void)
         {
             if (TestMentDelayTimer > 200)
             {
+
+
+				// RFID íƒœê·¸ì˜ íƒ€ìž…ì„ ë¦¬í„´
+				status = AddicoreRFID_Request(PICC_REQIDL, str);    
+    			if (status == MI_OK)    // MIFARE ì¹´ë“œì¼ë•Œë§Œ ìž‘ë™
+				{
+
+				}
+
+
+
+
+			
                 SPI_Play(TmpCurVoice);
+
+				
                 TmpCurVoice++;
                 if (TmpCurVoice > 100)
                     TmpCurVoice = 0;

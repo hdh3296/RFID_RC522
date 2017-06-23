@@ -12,6 +12,10 @@ unsigned char  ReadSPI_ADDR(unsigned char addr);
 unsigned char  SPI_Play(unsigned char sel_voice);
 unsigned char  SPI_Stop_Play(void);
 unsigned char  SPI_Play_Status_Chk(void);
+unsigned char  Write_AddicoreRFID(unsigned char addr,unsigned char thisdata);
+unsigned char  Read_AddicoreRFID(unsigned char addr);
+
+
 
 
 #define   	WRITE_CMD    0x00         
