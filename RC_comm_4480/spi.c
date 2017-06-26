@@ -15,7 +15,8 @@ void WriteSPI(unsigned char i)
 	zzz=0;
 	while(zzz<10) zzz++;
 
-	while(!BF);
+	while(!BF); // BF 플래그가 셋 되면 외부에서 데이타가 수신된 것이다. 
+				// 따라서 BF 가 셋되면 다음을 수행한다. 
 
 }
 
@@ -70,8 +71,10 @@ void InitSPI(void)
 	SSPSTAT = 0xC0;         //SPI Bus mode 0,0
 	SSPCON1 = 0x21;         //Enable SSP, Fosc/16
 
-	CKE=0;  //0
-	CKP=1;
+	CKE=0;  // SPI Clock Select bit
+	CKP=1; 	// Clock Polarity Select bit 
+			// 1 = Idle state for clock is a high level
+			// 0 = Idle state for clock is a low level
 
 	LATC4=1;
 	RC4=1;

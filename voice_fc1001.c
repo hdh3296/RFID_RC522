@@ -1405,14 +1405,15 @@ void    HextoASCIIByte(void)
 
 uchar str[MAX_LEN];
 volatile char mytest;
-volatile char mytest1;
+volatile char mytest1,mytest2,mytest3;
 
 
-
+volatile uchar checksum1;
 void    TestVoicePlay(void)
 {
     unsigned bBusy;
 	uchar status;
+	
 
 
     TmpCurVoice = 0;
@@ -1426,8 +1427,6 @@ void    TestVoicePlay(void)
     {
         CLRWDT();
 
-		str[1] = 0x4400;
-
 		// RFID 태그의 타입을 리턴
 		status = AddicoreRFID_Request(PICC_REQIDL, str);    
 		if (status == MI_OK)    // MIFARE 카드일때만 작동
@@ -1435,6 +1434,19 @@ void    TestVoicePlay(void)
 			mytest = str[0];
 			mytest1 = str[1];
 		}	
+
+		// RFID 충돌방지, RFID 태그의 ID값(시리얼넘버) 등 저장된 값을 리턴함. 4Byte
+    	status = AddicoreRFID_Anticoll(str);
+    	if (status == MI_OK)      // MIFARE 카드일때만 작동
+    	{			
+         	mytest = str[0];
+			mytest1 = str[1];			
+			mytest2 = str[2];
+			mytest3 = str[3];
+			checksum1 = str[0] ^ str[1] ^ str[2] ^ str[3];
+    	}
+
+		AddicoreRFID_Halt();  
     }
 
 }

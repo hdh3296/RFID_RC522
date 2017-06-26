@@ -134,6 +134,9 @@ void AntennaOn(void);
 void AddicoreRFID_Reset(void);
 void AddicoreRFID_Init(void);
 void SetBitMask(byte reg, byte mask);
+extern byte AddicoreRFID_Anticoll(byte *serNum);
+extern void CalulateCRC(byte *pIndata, byte len, byte *pOutData);
+extern void AddicoreRFID_Halt(void);
 
 
 

@@ -210,4 +210,100 @@ byte AddicoreRFID_ToCard(byte command, byte *sendData, byte sendLen,
     return status;
 }
 
+/*
+ * Function Name: AddicoreRFID_Anticoll
+ * Description: Anti-collision detection, reading selected card serial number card
+ * Input parameters: serNum - returns 4 bytes card serial number, the first 5 bytes for the checksum byte
+ * Return value: the successful return MI_OK
+ */
+byte AddicoreRFID_Anticoll(byte *serNum)
+{
+    byte status;
+    byte i;
+	byte serNumCheck=0;
+    //uint unLen;
+
+    //ClearBitMask(Status2Reg, 0x08);		//TempSensclear
+    //ClearBitMask(CollReg,0x80);			//ValuesAfterColl
+	Write_AddicoreRFID(BitFramingReg, 0x00);		//TxLastBists = BitFramingReg[2..0]
+ 
+    serNum[0] = PICC_ANTICOLL;
+    serNum[1] = 0x20;
+    status = AddicoreRFID_ToCard(PCD_TRANSCEIVE, serNum, 2, serNum, &_RxBits);
+
+    if (status == MI_OK)
+	{
+		//Check card serial number
+		for (i=0; i<4; i++)
+		{   
+		 	serNumCheck ^= serNum[i];
+		}
+		if (serNumCheck != serNum[i])
+		{   
+			status = MI_ERR;    
+		}
+    }
+
+    //SetBitMask(CollReg, 0x80);		//ValuesAfterColl=1
+
+	//memcpy(serNum, str, 5);
+    return status;
+} 
+
+/*
+ * Function Name: CalulateCRC
+ * Description: CRC calculation with MF522
+ * Input parameters: pIndata - To read the CRC data, len - the data length, pOutData - CRC calculation results
+ * Return value: None
+ */
+void CalulateCRC(byte *pIndata, byte len, byte *pOutData)
+{
+    byte i, n;
+
+    ClearBitMask(DivIrqReg, 0x04);			//CRCIrq = 0
+    SetBitMask(FIFOLevelReg, 0x80);			//Clear the FIFO pointer
+    //Write_AddicoreRFID(CommandReg, PCD_IDLE);
+
+	//Writing data to the FIFO	
+    for (i=0; i<len; i++)
+    {   
+		Write_AddicoreRFID(FIFODataReg, *(pIndata+i));   
+	}
+    Write_AddicoreRFID(CommandReg, PCD_CALCCRC);
+
+	//Wait CRC calculation is complete
+    i = 0xFF;
+    do 
+    {
+        n = Read_AddicoreRFID(DivIrqReg);
+        i--;
+    }
+    while ((i!=0) && !(n&0x04));			//CRCIrq = 1
+
+	//Read CRC calculation result
+    pOutData[0] = Read_AddicoreRFID(CRCResultRegL);
+    pOutData[1] = Read_AddicoreRFID(CRCResultRegM);
+}
+
+
+/*
+ * Function Name: AddicoreRFID_Halt
+ * Description: Command card into hibernation
+ * Input: None
+ * Return value: None
+ */
+void AddicoreRFID_Halt(void)
+{
+	byte status;
+    uint unLen;
+    byte buff[4]; 
+
+    buff[0] = PICC_HALT;
+    buff[1] = 0;
+    CalulateCRC(buff, 2, &buff[2]);
+ 
+    status = AddicoreRFID_ToCard(PCD_TRANSCEIVE, buff, 4, buff,&unLen);
+}
+
+
 #endif	
