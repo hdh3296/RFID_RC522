@@ -29,20 +29,6 @@ unsigned char  WriteSPI_ADDR(unsigned char addr,unsigned char thisdata)
 	return(SSPBUF);
 }
 
-
-
-unsigned char  Write_AddicoreRFID(unsigned char addr,unsigned char thisdata)
-{
-	CS=0;
-	WriteSPI(addr | WRITE_CMD);
-	WriteSPI(thisdata);
-	CS=1;
-	return(SSPBUF);
-}
-
-
-
-
 unsigned char  ReadSPI_ADDR(unsigned char addr)
 {
 	CS=0;
@@ -53,10 +39,20 @@ unsigned char  ReadSPI_ADDR(unsigned char addr)
 }
 
 
+
+unsigned char  Write_AddicoreRFID(unsigned char addr,unsigned char thisdata)
+{
+	CS=0;
+	WriteSPI((addr<<1)&0x7E);
+	WriteSPI(thisdata);
+	CS=1;
+	return(SSPBUF);
+}
+
 unsigned char  Read_AddicoreRFID(unsigned char addr)
 {
 	CS=0;
-	WriteSPI(addr | READ_CMD);
+	WriteSPI(((addr<<1)&0x7E) | 0x80);
 	WriteSPI(0x00);
 	CS=1;
 	return(SSPBUF);

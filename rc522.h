@@ -127,8 +127,13 @@
 
 uint _RxBits;		  // The number of received data bits
 
-
-extern byte AddicoreRFID_Request(byte reqMode, byte *TagType);
+byte AddicoreRFID_Request(byte reqMode, byte *TagType);
 byte AddicoreRFID_ToCard(byte command, byte *sendData, byte sendLen, 
 									byte *backData, uint *backLen);
+void AntennaOn(void);
+void AddicoreRFID_Reset(void);
+void AddicoreRFID_Init(void);
+void SetBitMask(byte reg, byte mask);
+
+
 

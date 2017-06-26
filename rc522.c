@@ -5,6 +5,67 @@
 #include "RC_comm_4480\spi.h"
 #include "rc522.h"
 
+
+/*
+ * Function Name: AntennaOn
+ * Description: Open antennas, each time you start or shut down the natural barrier between the transmitter should be at least 1ms interval
+ * Input: None
+ * Return value: None
+ */
+void AntennaOn(void)
+{
+	byte temp;
+
+	temp = Read_AddicoreRFID(TxControlReg);
+	if (!(temp & 0x03))
+	{
+		SetBitMask(TxControlReg, 0x03);
+	}
+}
+
+
+/*
+ * Function Name: AddicoreRFID_Reset
+ * Description: Perform soft reset of AddicoreRFID Module
+ * Input: None
+ * Return value: None
+ */
+void AddicoreRFID_Reset(void)
+{
+    Write_AddicoreRFID(CommandReg, PCD_SOFTRESET);
+}
+
+
+/*
+ * Function Name: AddicoreRFID_Init
+ * Description: Initialize the AddicoreRFID module
+ * Input: None
+ * Return value: None
+*/
+void AddicoreRFID_Init(void)
+{
+
+		AddicoreRFID_Reset();           // Soft reset the AddicoreRFID
+
+	 	
+	//Timer: TPrescaler*TreloadVal/6.78MHz = 24ms
+    Write_AddicoreRFID(TModeReg, 0x8D);		//Tauto=1; f(Timer) = 6.78MHz/TPreScaler
+    Write_AddicoreRFID(TPrescalerReg, 0x3E);	//TModeReg[3..0] + TPrescalerReg
+    Write_AddicoreRFID(TReloadRegL, 30);           
+    Write_AddicoreRFID(TReloadRegH, 0);
+	
+	Write_AddicoreRFID(TxAutoReg, 0x40);		//100%ASK
+	Write_AddicoreRFID(ModeReg, 0x3D);		//CRC Initial value 0x6363	???
+
+	//ClearBitMask(Status2Reg, 0x08);		//MFCrypto1On=0
+	//Write_AddicoreRFID(RxSelReg, 0x86);		//RxWait = RxSelReg[5..0]
+	//Write_AddicoreRFID(RFCfgReg, 0x7F);   		//RxGain = 48dB
+
+	AntennaOn();		//Open the antenna
+}
+
+
+
 void SetBitMask(byte reg, byte mask)  
 {
     byte tmp;
@@ -32,11 +93,11 @@ byte AddicoreRFID_Request(byte reqMode, byte *TagType)
 	{    
 		status = MI_ERR;
 	}
-   
+  
 	return status;
 }
 
-
+byte n;
 byte AddicoreRFID_ToCard(byte command, byte *sendData, byte sendLen, 
 												byte *backData, uint *backLen)
 {
@@ -44,7 +105,7 @@ byte AddicoreRFID_ToCard(byte command, byte *sendData, byte sendLen,
     byte irqEn = 0x00;
     byte waitIRq = 0x00;
     byte lastBits;
-    byte n;
+    
     uint i;
 
     switch (command)
@@ -71,20 +132,20 @@ byte AddicoreRFID_ToCard(byte command, byte *sendData, byte sendLen,
     
 	Write_AddicoreRFID(CommandReg, PCD_IDLE);	//NO action; Cancel the current command???
 
-	//Writing data to the FIFO
+	// Writing data to the FIFO
     for (i=0; i<sendLen; i++)
     {   
 		Write_AddicoreRFID(FIFODataReg, sendData[i]);    
 	}
 
-	//Execute the command
+	// Execute the command
 	Write_AddicoreRFID(CommandReg, command);
     if (command == PCD_TRANSCEIVE)
     {    
 		SetBitMask(BitFramingReg, 0x80);		//StartSend=1,transmission of data starts  
 	}   
     
-	//Waiting to receive data to complete
+	// Waiting to receive data to complete
 	i = 2000;	//i according to the clock frequency adjustment, the operator M1 card maximum waiting time 25ms???
     do 
     {

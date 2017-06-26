@@ -1403,70 +1403,38 @@ void    HextoASCIIByte(void)
 }
 
 
+uchar str[MAX_LEN];
+volatile char mytest;
+volatile char mytest1;
+
+
 
 void    TestVoicePlay(void)
 {
     unsigned bBusy;
 	uchar status;
-	uchar str[MAX_LEN];
+
 
     TmpCurVoice = 0;
     TestMentDelayTimer = 0;
     _VOICE_ACT = VOICE_ON;
+
+	AddicoreRFID_Init();
 
 
     for (;1;)
     {
         CLRWDT();
 
-        if (_VOICE_DOWNLOAD_PIN)
-            WaitDownLoader();
+		str[1] = 0x4400;
 
-        bBusy = VoiceBusy();
-
-        CLRWDT();
-
-        if (bBusy == FALSE)
-        {
-            if (TestMentDelayTimer > 200)
-            {
-
-
-				// RFID 태그의 타입을 리턴
-				status = AddicoreRFID_Request(PICC_REQIDL, str);    
-    			if (status == MI_OK)    // MIFARE 카드일때만 작동
-				{
-
-				}
-
-
-
-
-			
-                SPI_Play(TmpCurVoice);
-
-				
-                TmpCurVoice++;
-                if (TmpCurVoice > 100)
-                    TmpCurVoice = 0;
-                TestMentDelayTimer = 0;
-            }
-        }
-        else
-        {
-            TestMentDelayTimer = 0;
-        }
-
-		// Realay �׽�Ʈ
-		if (RealayTestTimer > 1000)
+		// RFID 태그의 타입을 리턴
+		status = AddicoreRFID_Request(PICC_REQIDL, str);    
+		if (status == MI_OK)    // MIFARE 카드일때만 작동
 		{
-			RealayTestTimer = 0;
-			
-			if(_BATTERY)
-				_BATTERY = BAT_OFF;
-			else
-				_BATTERY = BAT_ON;			
-		}
+			mytest = str[0];
+			mytest1 = str[1];
+		}	
     }
 
 }
