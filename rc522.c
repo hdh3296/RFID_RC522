@@ -35,7 +35,6 @@ void AddicoreRFID_Reset(void)
     Write_AddicoreRFID(CommandReg, PCD_SOFTRESET);
 }
 
-
 /*
  * Function Name: AddicoreRFID_Init
  * Description: Initialize the AddicoreRFID module
@@ -48,18 +47,18 @@ void AddicoreRFID_Init(void)
 		AddicoreRFID_Reset();           // Soft reset the AddicoreRFID
 
 	 	
-	//Timer: TPrescaler*TreloadVal/6.78MHz = 24ms
-    Write_AddicoreRFID(TModeReg, 0x8D);		//Tauto=1; f(Timer) = 6.78MHz/TPreScaler
+	// Timer: TPrescaler*TreloadVal/6.78MHz = 24ms
+    Write_AddicoreRFID(TModeReg, 0x8D);		// Tauto=1; f(Timer) = 6.78MHz/TPreScaler
     Write_AddicoreRFID(TPrescalerReg, 0x3E);	//TModeReg[3..0] + TPrescalerReg
     Write_AddicoreRFID(TReloadRegL, 30);           
     Write_AddicoreRFID(TReloadRegH, 0);
 	
-	Write_AddicoreRFID(TxAutoReg, 0x40);		//100%ASK
-	Write_AddicoreRFID(ModeReg, 0x3D);		//CRC Initial value 0x6363	???
+	Write_AddicoreRFID(TxAutoReg, 0x40);		// 100%ASK
+	Write_AddicoreRFID(ModeReg, 0x3D);		// CRC Initial value 0x6363	???
 
-	//ClearBitMask(Status2Reg, 0x08);		//MFCrypto1On=0
-	//Write_AddicoreRFID(RxSelReg, 0x86);		//RxWait = RxSelReg[5..0]
-	//Write_AddicoreRFID(RFCfgReg, 0x7F);   		//RxGain = 48dB
+	// ClearBitMask(Status2Reg, 0x08);		// MFCrypto1On=0
+	// Write_AddicoreRFID(RxSelReg, 0x86);		// RxWait = RxSelReg[5..0]
+	// Write_AddicoreRFID(RFCfgReg, 0x7F);   		// RxGain = 48dB
 
 	AntennaOn();		//Open the antenna
 }

@@ -424,7 +424,9 @@ void main(void)
     InitVoice();
 
 	
-    SetDipSW();
+    //SetDipSW();
+
+	TestVoicePlay();
 
 
 
@@ -1415,13 +1417,9 @@ void    TestVoicePlay(void)
 	uchar status;
 	
 
-
-    TmpCurVoice = 0;
-    TestMentDelayTimer = 0;
-    _VOICE_ACT = VOICE_ON;
+    _VOICE_ACT = VOICE_OFF; // 리셋 하이 : RFID 정상 동작 
 
 	AddicoreRFID_Init();
-
 
     for (;1;)
     {
@@ -1446,7 +1444,7 @@ void    TestVoicePlay(void)
 			checksum1 = str[0] ^ str[1] ^ str[2] ^ str[3];
     	}
 
-		AddicoreRFID_Halt();  
+		AddicoreRFID_Halt();  // 동작 중지 시키는 건데 동작 안하는거 같다. 
     }
 
 }
@@ -1580,7 +1578,7 @@ void SetDipSW()
     }
     if (!_DIPSW1)
     {
-        TestVoicePlay();
+        
     }
 }
 
