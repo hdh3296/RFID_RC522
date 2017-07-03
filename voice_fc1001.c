@@ -15,6 +15,13 @@ date    :       1999,9,21
 #include        "Voice_Ext_IO_8.h"
 #include		"rc522.h"
 
+#include		"com.h"
+
+#define	TRMT	TRMT1	
+#define	OERR	OERR1
+#define	TXEN	TXEN1
+#define	SPEN	SPEN1
+#define	FERR	FERR1
 
 
 
@@ -411,6 +418,8 @@ void main(void)
     InitSPI();
     Tx1ConfirmCnt = 0;
     Tx0ConfirmCnt = 0;
+
+	init_comms();
     ei();
 
     LoadSetupValue();  //120927 :SetupCheck() ?? ??
@@ -667,6 +676,34 @@ void interrupt isr(void)
         CanInterrupt();
     }
 #endif
+
+
+/* 232 시리얼 */ 
+
+	if((RCIE)&&(RCIF))										/*receive interrupt routine*/
+	{
+        RCIF=0;
+        USART0_RXC();
+	}	
+
+	if((TXIE)&&(TXIF))										/*transmit interrupt routine*/
+	{
+        TXIF=0;
+        USART0_TXC();
+	}	
+
+
+	if(OERR) {
+      	TXEN=0;
+      	TXEN=1;
+      	SPEN=0;
+      	SPEN=1;
+		CREN1=0;
+    }
+
+	if( !CREN1)	CREN1=1;
+	
+
 
 }
 
@@ -1410,6 +1447,24 @@ volatile char mytest;
 volatile char mytest1,mytest2,mytest3;
 
 
+
+void  Serial2Check(void)
+{
+	unsigned char i;
+
+    if(Com1RxStatus==RX_GOOD){      
+		//for(i=0;i<(Com1RxBuffer[3]+4);i++)	Can1TxBuf[i]=Com1RxBuffer[i];
+		//Can1TxDataTxPointer=2;	
+		//Can1TxDataTotalCnt= (Com1RxBuffer[3]+4);
+        //Com1RxStatus=STX_CHK; 
+		//RXLED = !RXLED;
+    }                         
+}
+
+
+
+
+
 volatile uchar checksum1;
 void    TestVoicePlay(void)
 {
@@ -1424,6 +1479,19 @@ void    TestVoicePlay(void)
     for (;1;)
     {
         CLRWDT();
+
+		Serial2Check();
+
+		if(Com1RxStatus == TX_SET){
+			if(Com1SerialTime > 3){
+				Com1SerialTime=0;
+				Com1RxStatus=STX_CHK; 
+				Com1TxThisPt=0;
+				Com1TxCnt=0;
+				TXIE=0;
+				TX_EN=0;
+			}
+		}
 
 		// RFID 태그의 타입을 리턴
 		status = AddicoreRFID_Request(PICC_REQIDL, str);    
@@ -1442,6 +1510,8 @@ void    TestVoicePlay(void)
 			mytest2 = str[2];
 			mytest3 = str[3];
 			checksum1 = str[0] ^ str[1] ^ str[2] ^ str[3];
+
+			Com1TxStart();	
     	}
 
 		AddicoreRFID_Halt();  // 동작 중지 시키는 건데 동작 안하는거 같다. 
