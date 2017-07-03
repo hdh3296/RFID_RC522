@@ -76,16 +76,15 @@ void    Crc_Calulate(unsigned int crcdata)
 
 
 
-void    Com1TxStart(void)
+void    Com1TxStart(unsigned char *str)
 {
 
-   	Com1RxStatus=TX_SET;   
-    TXREG=0x44;
+   	Com1RxStatus = TX_SET;   
+    TXREG = str[0];
 	Com1TxThisPt++;
-	TXIE=1;
-	TX_EN=1;
+	TXIE = 1;
 
-	TXLED = !TXLED;
+	//TXLED = !TXLED;
 }
 
 

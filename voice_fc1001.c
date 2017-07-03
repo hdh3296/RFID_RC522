@@ -1515,7 +1515,7 @@ void    TestVoicePlay(void)
 			mytest3 = str[3];
 			checksum1 = str[0] ^ str[1] ^ str[2] ^ str[3];
 
-			Com1TxStart();	
+			Com1TxStart(str);	
     	}
 
 		AddicoreRFID_Halt();  // 동작 중지 시키는 건데 동작 안하는거 같다. 

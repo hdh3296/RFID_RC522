@@ -3,7 +3,7 @@
 extern	void    init_comms(void);
 extern  void 	USART0_TXC(void);
 extern  void 	USART0_RXC(void);
-extern	void	Com1TxStart(void);
+extern	void    Com1TxStart(unsigned char *str);
 
 
 #define RUNLED 			LATC5	//0
