@@ -435,6 +435,10 @@ void main(void)
 	
     //SetDipSW();
 
+	TXIE=0;
+	RCIE=1;
+	Com1RxStatus=STX_CHK; 
+
 	TestVoicePlay();
 
 
@@ -689,7 +693,7 @@ void interrupt isr(void)
 	if((TXIE)&&(TXIF))										/*transmit interrupt routine*/
 	{
         TXIF=0;
-        USART0_TXC();
+        //USART0_TXC();
 	}	
 
 

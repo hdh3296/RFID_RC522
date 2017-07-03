@@ -80,7 +80,7 @@ void    Com1TxStart(void)
 {
 
    	Com1RxStatus=TX_SET;   
-    TXREG=Com1TxBuffer[Com1TxThisPt];
+    TXREG=0x44;
 	Com1TxThisPt++;
 	TXIE=1;
 	TX_EN=1;
