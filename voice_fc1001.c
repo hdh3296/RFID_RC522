@@ -11,11 +11,11 @@ date    :       1999,9,21
 #include        "RC_comm_4480\comdata.h"
 #include        "RC_comm_4480\setup.h"
 #include        "RC_comm_4480\spi.h"
-
 #include        "Voice_Ext_IO_8.h"
 #include		"rc522.h"
-
 #include		"com.h"
+#include		"delay.h"
+#include		"voice_fc1001.h"
 
 #define	TRMT	TRMT1	
 #define	OERR	OERR1
@@ -332,6 +332,11 @@ bit bVoicePlaying; // ���� ���� ��� ������ �ƴ���
 bit bCloseVoice;
 bit bSetCarBtnVoice;
 
+
+unsigned int	run_timer;
+
+
+
 typedef struct
 {
     unsigned char CarKey[4];
@@ -439,10 +444,9 @@ void main(void)
 	RCIE=1;
 	Com1RxStatus=STX_CHK; 
 
+
+
 	TestVoicePlay();
-
-
-	Ext_IO_8_Init();
 
 
 
@@ -631,6 +635,15 @@ void interrupt isr(void)
         TMR0L = MSEC_L;
         TMR0H = MSEC_H;
 
+
+		run_timer++;
+		if (run_timer > 500)
+		{
+			LED1 = !LED1;
+			run_timer = 0;
+		}
+
+
         TestMentDelayTimer++;
         shiftTime++;
 
@@ -667,7 +680,7 @@ void interrupt isr(void)
 #endif
 
 
-/* 232 시리얼 */ 
+/* 232 ?�리??*/ 
 
 	if((RCIE)&&(RCIF))										/*receive interrupt routine*/
 	{
@@ -1431,7 +1444,7 @@ void    HextoASCIIByte(void)
 }
 
 
-uchar str[MAX_LEN];
+
 volatile char mytest;
 volatile char mytest1,mytest2,mytest3;
 
@@ -1460,7 +1473,7 @@ void    TestVoicePlay(void)
     unsigned bBusy;
 	uchar status;	
 
-    _VOICE_ACT = VOICE_OFF; // 리셋 하이 : RFID 정상 동작 
+    _VOICE_ACT = VOICE_OFF; // 리셋 ?�이 : RFID ?�상 ?�작 
 
 	AddicoreRFID_Init();
 
@@ -1481,30 +1494,34 @@ void    TestVoicePlay(void)
 			}
 		}
 
-		// RFID 태그의 타입을 리턴
+		// RFID ?�그???�?�을 리턴
 		status = AddicoreRFID_Request(PICC_REQIDL, str);    
-		if (status == MI_OK)    // MIFARE 카드일때만 작동
+		if (status == MI_OK)    // MIFARE 카드?�때�??�동
 		{
-			mytest = str[0];
-			mytest1 = str[1];
+			//mytest = str[0];
+			//mytest1 = str[1];
 		}	
 
-		// RFID 충돌방지, RFID 태그의 ID값(시리얼넘버) 등 저장된 값을 리턴함. 4Byte
+		// RFID 충돌방�?, RFID ?�그??ID�??�리?�넘�? ???�?�된 값을 리턴?? 4Byte
     	status = AddicoreRFID_Anticoll(str);
-    	if (status == MI_OK)      // MIFARE 카드일때만 작동
+    	if (status == MI_OK)      // MIFARE 카드?�때�??�동
     	{			
-         	mytest = str[0];
-			mytest1 = str[1];			
-			mytest2 = str[2];
-			mytest3 = str[3];
-			checksum1 = str[0] ^ str[1] ^ str[2] ^ str[3];
+         	mytest 		= str[0];
+			mytest1 	= str[1];			
+			mytest2 	= str[2];
+			mytest3 	= str[3];
+			checksum1 	= str[0] ^ str[1] ^ str[2] ^ str[3];
 
-			Com1TxStartStr(str);
+			Com1TxStartStr();
 
 			mytest_cnt++;
+			DelayMs(1000);
+
+			
+			
     	}
 
-		AddicoreRFID_Halt();  // 동작 중지 시키는 건데 동작 안하는거 같다. 
+		AddicoreRFID_Halt();  // ?�작 중�? ?�키??건데 ?�작 ?�하?�거 같다. 
     }
 
 }
@@ -1537,9 +1554,9 @@ void    PortInit(void)
     TRISC5 = 1;
     TRISC4 = 1;
     TRISC3 = 1;
-    TRISC2 = 1;
-    TRISC1 = 1;
-    TRISC0 = 1;
+    TRISC2 = 0;
+    TRISC1 = 0;
+    TRISC0 = 0;
 
 // TRISB Register
     TRISB7 = 1;	// port B data direction

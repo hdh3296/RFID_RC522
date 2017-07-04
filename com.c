@@ -5,6 +5,8 @@
 #include    "com.h"
 #include    "serial.h"
 #include    "MyUtil.h"
+#include    "rc522.h"
+#include	"voice_fc1001.h"
 
 ///////////////////////
 #define     ASCTOHEX(x) ((x <= '9') ? (x - '0') : (x - '7')) 
@@ -69,7 +71,7 @@ void    Crc_Calulate(unsigned int crcdata)
 
 
 
-void    Com1TxStartStr(unsigned char *str)
+void    Com1TxStartStr(void)
 {
 
    	Com1RxStatus = TX_SET;  
@@ -78,18 +80,18 @@ void    Com1TxStartStr(unsigned char *str)
 	nCom1TxStrIndex++;
 	TXIE = 1;
 
-	//TXLED = !TXLED;
+	LED2 = !LED2;
 }
 
 
 void Com1TxNextStr(void)
 {	
 	
-	TXREG = Com1TxBuffer[nCom1TxStrIndex];
+	TXREG = str[nCom1TxStrIndex];
 	nCom1TxStrIndex++;
 	Com1TxTimer=0;
 		
-	if(nCom1TxStrIndex >= (COM1_MAX_TX_BUF-1))
+	if(nCom1TxStrIndex >= (MAX_LEN-1))
 	{	
 		TXIE=0;
 	}
