@@ -442,17 +442,8 @@ void main(void)
 	TestVoicePlay();
 
 
-
-	SetVoice(); // °¢Á¾ ¼ÂÆÃ ¿©ºÎ 
-    if (bSetSong) bSetCarBtnVoice = FALSE;
-
-
 	Ext_IO_8_Init();
 
-// ÀÏ¹İÇü º¸µå¿¡¼­ È®ÀåIO º¸µå·Î ³Ñ¾î°¡¸é¼­ ¸±·¹ÀÌ IO°¡ Ãâ·Â¿¡¼­ ÀÔ·ÂÀ¸·Î ¹Ù³¢¾ú±â ¶§¹®¿¡ ....
-#if   defined(NormalBoard_DoorSlow) 
-	TRISC0	=	0x0;    // VOICE ÀÏ¹İ º¸µå ÀÎ °æ¿ì, ¸±·¹ÀÌ Ãâ·ÂÀ¸·Î ¼³Á¤ 
-#endif
 
 
     while (1)
@@ -461,12 +452,6 @@ void main(void)
 
 		Ext_IO_8_Func();
 
-
-        // Voice Downlod Áß...
-        if (_VOICE_DOWNLOAD_PIN)
-        {
-            WaitDownLoader();
-        }
 
         if (ELE_bIN_RELAY)
 		{
@@ -693,7 +678,7 @@ void interrupt isr(void)
 	if((TXIE)&&(TXIF))										/*transmit interrupt routine*/
 	{
         TXIF=0;
-        //USART0_TXC();
+        Com1TxNextStr();
 	}	
 
 
@@ -1467,14 +1452,13 @@ void  Serial2Check(void)
 
 
 
-
+volatile int mytest_cnt=0;
 
 volatile uchar checksum1;
 void    TestVoicePlay(void)
 {
     unsigned bBusy;
-	uchar status;
-	
+	uchar status;	
 
     _VOICE_ACT = VOICE_OFF; // ë¦¬ì…‹ í•˜ì´ : RFID ì •ìƒ ë™ì‘ 
 
@@ -1487,10 +1471,10 @@ void    TestVoicePlay(void)
 		Serial2Check();
 
 		if(Com1RxStatus == TX_SET){
-			if(Com1SerialTime > 3){
-				Com1SerialTime=0;
+			if(Com1TxTimer > 3){
+				Com1TxTimer=0;
 				Com1RxStatus=STX_CHK; 
-				Com1TxThisPt=0;
+				nCom1TxStrIndex=0;
 				Com1TxCnt=0;
 				TXIE=0;
 				TX_EN=0;
@@ -1515,7 +1499,9 @@ void    TestVoicePlay(void)
 			mytest3 = str[3];
 			checksum1 = str[0] ^ str[1] ^ str[2] ^ str[3];
 
-			Com1TxStart(str);	
+			Com1TxStartStr(str);
+
+			mytest_cnt++;
     	}
 
 		AddicoreRFID_Halt();  // ë™ì‘ ì¤‘ì§€ ì‹œí‚¤ëŠ” ê±´ë° ë™ì‘ ì•ˆí•˜ëŠ”ê±° ê°™ë‹¤. 

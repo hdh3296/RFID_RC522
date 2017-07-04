@@ -12,14 +12,7 @@
 
 
 
-unsigned char	Com1TxBuffer[COM1_MAX_TX_BUF];
-unsigned char	Com1RxBuffer[COM1_MAX_RX_BUF];
-unsigned char	Com1TxCnt=0;
-unsigned char	Com1TxThisPt=0;
-unsigned char   Com1RxStatus=0;
-unsigned char	Com1RxCurCnt=0;
-unsigned char	Com1SerialTime=0x0;
-unsigned int	Com1BaudRate=19200;
+
 
 //unsigned    int  Crc;  
 
@@ -76,44 +69,29 @@ void    Crc_Calulate(unsigned int crcdata)
 
 
 
-void    Com1TxStart(unsigned char *str)
+void    Com1TxStartStr(unsigned char *str)
 {
 
-   	Com1RxStatus = TX_SET;   
-    TXREG = str[0];
-	Com1TxThisPt++;
+   	Com1RxStatus = TX_SET;  
+	nCom1TxStrIndex = 0;
+    TXREG = str[nCom1TxStrIndex];
+	nCom1TxStrIndex++;
 	TXIE = 1;
 
 	//TXLED = !TXLED;
 }
 
 
-
-
-
-
-void USART0_TXC(void)
-{					
-	if((Com1TxThisPt >= Com1TxCnt)){
-		Com1SerialTime=0;
-		Com1TxThisPt=0;
- 		Com1TxCnt=0;	
-		TXIE=0;
-	}
-	else{
+void Com1TxNextStr(void)
+{	
+	
+	TXREG = Com1TxBuffer[nCom1TxStrIndex];
+	nCom1TxStrIndex++;
+	Com1TxTimer=0;
 		
-		if(Com1TxThisPt >= COM1_MAX_TX_BUF){
-			Com1SerialTime=0;
-			Com1TxThisPt=0;
-	 		Com1TxCnt=0;	
-			TXIE=0;
-		}
-		else{
-			TXREG=Com1TxBuffer[Com1TxThisPt];
-			Com1TxThisPt++;
-			Com1SerialTime=0;
-			Com1RxStatus = TX_SET;
-		}
+	if(nCom1TxStrIndex >= (COM1_MAX_TX_BUF-1))
+	{	
+		TXIE=0;
 	}
 }
 
@@ -132,11 +110,11 @@ void USART0_RXC(void)
     if(Com1RxStatus != TX_SET)
     {   
 
-		if(Com1SerialTime > 4){
+		if(Com1TxTimer > 4){
             Com1RxCurCnt=0;
 		}
 
-        Com1SerialTime=0;
+        Com1TxTimer=0;
 
         Com1RxBuffer[Com1RxCurCnt]=buf;
 
@@ -219,11 +197,11 @@ unsigned int   __attribute__((section(".usercode"))) Com1Crt_Protocol(unsigned c
 
     if(Com1RxStatus != TX_SET){   
 
-		if(Com1SerialTime > 4){
+		if(Com1TxTimer > 4){
             Com1RxCnt=0;
 		}
 
-        Com1SerialTime=0;
+        Com1TxTimer=0;
         Com1RxBuffer[Com1RxCnt]=buf;
 
         if(Com1RxCnt < (MAX_COM1_RXBUF-1)){

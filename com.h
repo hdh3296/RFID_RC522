@@ -1,9 +1,9 @@
 
 
 extern	void    init_comms(void);
-extern  void 	USART0_TXC(void);
+extern  void 	Com1TxNextStr(void);
 extern  void 	USART0_RXC(void);
-extern	void    Com1TxStart(unsigned char *str);
+extern	void    Com1TxStartStr(unsigned char *str);
 
 
 #define RUNLED 			LATC5	//0
@@ -48,13 +48,16 @@ extern	void    Com1TxStart(unsigned char *str);
 #define	COM1_MAX_TX_BUF		100
 #define	COM1_MAX_RX_BUF		100
 
-extern	unsigned 	char	Com1TxBuffer[COM1_MAX_TX_BUF];
-extern	unsigned 	char	Com1RxBuffer[COM1_MAX_RX_BUF];
-extern	unsigned 	char	Com1TxCnt;
-extern	unsigned 	char	Com1TxThisPt;
 
-extern	unsigned 	char   	Com1RxStatus;
-extern	unsigned 	char   	Com1RxCurCnt;
-extern	unsigned 	char 	Com1SerialTime;
-extern	unsigned 	int		Com1BaudRate;
+unsigned char	nCom1TxStrIndex=0;
+
+unsigned char	Com1TxBuffer[COM1_MAX_TX_BUF];
+unsigned char	Com1RxBuffer[COM1_MAX_RX_BUF];
+unsigned char	Com1TxCnt=0;
+
+unsigned char   Com1RxStatus=0;
+unsigned char	Com1RxCurCnt=0;
+unsigned char	Com1TxTimer=0x0;
+unsigned int	Com1BaudRate=19200;
+
 
