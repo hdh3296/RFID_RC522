@@ -25,7 +25,7 @@ date    :       1999,9,21
 
 
 
-#define NormalBoard_DoorSlow	1 // ÀÏ¹ÝÇü º¸µå·Î µµ¾î ½½·Î¿ì Á¦¾î ±â´É »ç¿ë ½Ã(¸±·¹ÀÌ Ãâ·Â), È®ÀåIOº¸µå »ç¿ë½Ã¿¡´Â µðÆÄÀÎ ¸·¾Æ¾ß ÇÑ´Ù. 
+#define NormalBoard_DoorSlow	1 // ï¿½Ï¹ï¿½? ï¿½ï¿½ï¿½ï¿½? ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½?? ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ?? ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ??), È®ï¿½ï¿½IOï¿½ï¿½ï¿½ï¿½ ??ï¿½Ã¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½? ?ï¿½ï¿½. 
 
 
 #define START_FL	FLOOR_B7
@@ -34,7 +34,7 @@ date    :       1999,9,21
 #define VOICE_ON               0
 #define VOICE_OFF              1
 
-//Ãþ Á¤º¸ Á¤ÀÇ
+//? ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 #define         DINGDONG_MENT          0
 #define         UP_MENT                1
 #define         DOWN_MENT              2
@@ -132,24 +132,24 @@ date    :       1999,9,21
 #define         PUSH_MENT      		    FLOOR_B7+86	//94
 #define         SILENCE_MENT            FLOOR_B7+87 //95
 #define         SONG_MENT               FLOOR_B7+88 //96
-#define         BEEP_MENT               FLOOR_B7+89 //97 »ß ¼Ò¸®
+#define         BEEP_MENT               FLOOR_B7+89 //97 ? ?ï¿½ï¿½
 #define			CARBTN_L				FLOOR_B7+90 //98	
 #define			OPPOSITE_OPEN_MENT		FLOOR_B7+91 //99
-/* --> ÁÖÀÇ : ÃþµµÂø ¸àÆ®¿¡ ´ëÇØ¼­´Â µùµ¿ Á¶°ÇÀ» ³Ö¾î Áà¾ß ÇÏ¹Ç·Î <--*/
-#define         FLOOR_P                	FLOOR_B7+92	//100 ÆÄÅ· Floor
+/* --> ï¿½ï¿½ï¿½ï¿½ : ?ï¿½ï¿½ï¿½ï¿½ ?Æ®ï¿½ï¿½ ï¿½ï¿½?ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½? ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ?ï¿½ï¿½ ?? ?ï¿½ï¿½? <--*/
+#define         FLOOR_P                	FLOOR_B7+92	//100 ï¿½ï¿½Å· Floor
 #define         CARBTN_M                FLOOR_B7+93	//101 
 
 	
 	
-#define NO_MENT 0xff // ¸àÆ® ¾øÀ½
+#define NO_MENT 0xff // ?Æ® ï¿½ï¿½ï¿½ï¿½
 
 
 
 
-//IO Á¤ÀÇ
-#define   		_DIPSW1        RD4     //in , Å×½ºÆ® ¸ðµå ¼³Á¤
-#define   		_DIPSW2        RD5     //in , Ä«¹öÆ° À½¼º ¼³Á¤
-#define   		_DIPSW3        RD6     //in , Local ¼³Á¤
+//IO ï¿½ï¿½ï¿½ï¿½
+#define   		_DIPSW1        RD4     //in , ï¿½×½ï¿½Æ® ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+#define   		_DIPSW2        RD5     //in , Ä«ï¿½ï¿½Æ° ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+#define   		_DIPSW3        RD6     //in , Local ï¿½ï¿½ï¿½ï¿½
 #define   		_DIPSW4        RD7     //in ,    "
 
 #ifdef	CPU45K80
@@ -180,7 +180,7 @@ date    :       1999,9,21
 #endif
 
 #ifndef BAT_ON
-#define BAT_ON	1	// High ÀÏ ¶§ = ON
+#define BAT_ON	1	// High ï¿½ï¿½ ï¿½ï¿½ = ON
 #endif
 #ifndef BAT_OFF
 #define BAT_OFF	0
@@ -188,7 +188,7 @@ date    :       1999,9,21
 
 
 //
-#define ELE_nCURFLOOR          RcvBuf[IdPt + S0_FLOOR] // Ãþ¼ö¸¦ 10Áø¼ö·Î Ç¥Çö
+#define ELE_nCURFLOOR          RcvBuf[IdPt + S0_FLOOR] // ?ï¿½ï¿½ï¿½ï¿½ 10ï¿½ï¿½ï¿½ï¿½? Ç¥?
 
 #define ELE_bOPEN           (((RcvBuf[IdPt + S1_STATE] & S1_OPEN) != 0x00)?		1:0)
 #define ELE_bCLOSE          (((RcvBuf[IdPt + S1_STATE] & S1_CLOSE) != 0x00)?		1:0)
@@ -202,7 +202,7 @@ date    :       1999,9,21
 #define ELE_bDOWN           (((RcvBuf[IdPt + S2_STATE] & S2_DN) != 0x00)?		1:0)
 #define ELE_bCAR_MOVE       (((RcvBuf[IdPt + S2_STATE] & S2_CAR_MOVE) != 0x00)?		1:0)
 #define ELE_bEXT_BUT_CLR    (((RcvBuf[IdPt + S2_STATE] & S2_EXT_BUT_CLR) != 0x00)?		1:0)
-#define ELE_bFLOW           (((RcvBuf[IdPt + S2_STATE] & S2_FLOW) != 0x00)?		1:0) // À½¼º½ÃÀÛ
+#define ELE_bFLOW           (((RcvBuf[IdPt + S2_STATE] & S2_FLOW) != 0x00)?		1:0) // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 #define ELE_bFIRE           (((RcvBuf[IdPt + S2_STATE] & S2_FIRE) != 0x00)?		1:0)
 #define ELE_bCAR_BUT_CLR    (((RcvBuf[IdPt + S2_STATE] & S2_CAR_BUT_CLR) != 0x00)?		1:0)
 #define ELE_bOPEN_LAMP_ON   (((RcvBuf[IdPt + S2_STATE] & S2_OPEN_LAMP_ON) != 0x00)?		1:0)
@@ -229,7 +229,7 @@ date    :       1999,9,21
 #define ELE_DSP2         RcvBuf[IdPt + DSP2]
 
 #define ELE_mSYSSTATUS  RcvBuf[IdPt + SL_mSysStatus]
-// I/O  ÀÔ·Â : // 0x0 ÀÌ¸é? ÀÔ·Â Á¢Á¡¿¡ ½ÅÈ£ ON / ÀÔ·Â ºñÆ® °ªÀº ½ÇÁ¦ ÀÔ·ÂÀÌ ¾Èµé¾î ¿Ã¶§ (Áï, ÀÔ·Â LED¿¡ ºÒÀÌ ¾È µé¾î ¿Ã¶§ ºñÆ® 1°ªÀÌ Åë½ÅÀ¸·Î ¿Â´Ù.) / Åë½Å ºñÆ® 0 = ÀÔ·Â ON 
+// I/O  ï¿½ï¿½? : // 0x0 ï¿½Ì¸ï¿½? ï¿½ï¿½? ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È£ ON / ï¿½ï¿½? ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½?ï¿½ï¿½ ï¿½Èµï¿½ï¿½ ?ï¿½ï¿½ (ï¿½ï¿½, ï¿½ï¿½? LEDï¿½ï¿½ ?ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ ?ï¿½ï¿½ ï¿½ï¿½Æ® 1ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½? ?ï¿½ï¿½.) / ï¿½ï¿½ï¿½ ï¿½ï¿½Æ® 0 = ï¿½ï¿½? ON 
 #define ELE_bIN_EMG  	(((RcvBuf[IdPt + SL_IN_EMG] & 0x01) == 0x0)?			0:1)
 #define ELE_bIN_PRK 	(((RcvBuf[IdPt + SL_IN_EMG] & (0x01 << 1)) == 0x0)?		0:1)
 #define ELE_bIN_AT  	(((RcvBuf[IdPt + SL_IN_EMG] & (0x01 << 2)) == 0x0)?		1:0)
@@ -246,7 +246,7 @@ date    :       1999,9,21
 #define ELE_bIN_FR2 	(((RcvBuf[IdPt + SL_IN_FIRE] & (0x01 << 1)) == 0x0)?		1:0)
 
 
-// I/O  Ãâ·Â / Ãâ·ÂÀº Ãâ·Â LED¿¡ ºÒÀÌ µé¾î ¿Ã¶§, Áï Ãâ·ÂÀÌ ³ª°¥ ¶§ Ãâ·Â Åë½Å ºñÆ®´Â 1·Î ¼Â µÈ´Ù. / Åë½Å ºñÆ® 1 = Ãâ·Â ON
+// I/O  ?? / ??ï¿½ï¿½ ?? LEDï¿½ï¿½ ?ï¿½ï¿½ ï¿½ï¿½ï¿½ ?ï¿½ï¿½, ï¿½ï¿½ ??ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ?? ï¿½ï¿½ï¿½ ï¿½ï¿½Æ®ï¿½ï¿½ 1? ï¿½ï¿½ ï¿½È´ï¿½. / ï¿½ï¿½ï¿½ ï¿½ï¿½Æ® 1 = ?? ON
 #define ELE_bIN_FAN  	(((RcvBuf[IdPt + SL_OUT_FAN] & 0x01) == 0x0)?				0:1)
 #define ELE_bIN_LIT 	(((RcvBuf[IdPt + SL_OUT_FAN] & (0x01 << 1)) == 0x0)?		0:1)
 #define ELE_bIN_BUZ  	(((RcvBuf[IdPt + SL_OUT_FAN] & (0x01 << 2)) == 0x0)?		0:1)
@@ -266,7 +266,7 @@ date    :       1999,9,21
 
 
 
-#define BEEP_DELAY_TIME	4000 // ´ÜÀ§ msec
+#define BEEP_DELAY_TIME	4000 // ï¿½ï¿½ï¿½ï¿½ msec
 
 
 volatile const unsigned char FloorChar[] = {"B5B4B3B2B10102030405060708091011121314151617181920212223242526272829303132"};
@@ -317,7 +317,7 @@ unsigned    char  YourDoor1;
 unsigned    char  YourDoor2;
 unsigned    char  YourDoor3;
 
-unsigned    char  CurCarKey[4] = {0, 0, 0, 0}; // ÇöÀç µî·ÏµÈ Ä«Å° ÄÝ »óÅÂ ÀúÀå
+unsigned    char  CurCarKey[4] = {0, 0, 0, 0}; // ?ï¿½ï¿½ ï¿½ï¿½?ï¿½ï¿½ Ä«Å° ï¿½ï¿½ ?ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 unsigned    char  BefCarKey[4] = {0, 0, 0, 0};
 
 
@@ -328,7 +328,7 @@ bit BatteryRun;
 bit Flow_Active;
 bit valid_key;
 bit active_key;
-bit bVoicePlaying; // ÇöÀç À½¼º ¹æ¼Û ÁßÀÎÁö ¾Æ´ÑÁö
+bit bVoicePlaying; // ?ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ?ï¿½ï¿½ï¿½ï¿½ ï¿½Æ´ï¿½ï¿½ï¿½
 bit bCloseVoice;
 bit bSetCarBtnVoice;
 
@@ -381,7 +381,7 @@ bit bHajaeMentEn;
 
 
 
-// ÇÔ¼öÀÇ ¿øÇü
+// ?ï¿½ï¿½ï¿½ï¿½ ??
 extern void	WaitDownLoader(void);
 extern void    SetupDisplayES15(unsigned char mdata, unsigned char mode);
 extern void  SetupDisplay(unsigned char ft, unsigned char sd);
@@ -411,7 +411,7 @@ extern unsigned char  GetVoice_BeepByBuz(unsigned char);
 
 
 //##################################//
-// ¸ÞÀÎ ÇÔ¼ö				    	//
+// ?ï¿½ï¿½ ?ï¿½ï¿½				    	//
 //##################################//
 
 void main(void)
@@ -466,11 +466,11 @@ void main(void)
             _BATTERY = BAT_OFF;
 		}
 
-        DspCharRdWr(); // CAR CALL À½¼ºÀ» À§ÇÑ ¿¤¸®º£ÀÌÅÍ °¢Ãþ µð½ºÇÃ·¹ÀÌ °ª ÀúÀå
-        SetCarKeyCancel(); // CAR CALL Ãë¼Ò °ª ¼ÂÆÃ
+        DspCharRdWr(); // CAR CALL ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½? ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½? ï¿½ï¿½?ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+        SetCarKeyCancel(); // CAR CALL ?? ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
         TmpCurVoice = NO_MENT;
-        // Beef ¸àÆ® °ü·Ã
+        // Beef ?Æ® ï¿½ï¿½?
         if (ELE_bIN_BUZ)
         {
             TmpCurVoice = GetVoice_OverLoad(TmpCurVoice, CurVoice);
@@ -502,7 +502,7 @@ void main(void)
             _VOICE_ACT = VOICE_ON;
             if (bVoicePlaying)
             {
-                SPI_Stop_Play(); // ÀÏ´Ü, ±âÁ¸ ¹æ¼Û ÁßÀÌ´ø À½¼º ÁßÁö !
+                SPI_Stop_Play(); // ï¿½Ï´ï¿½, ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ?ï¿½Ì´ï¿½ ï¿½ï¿½ï¿½ï¿½ ?ï¿½ï¿½ !
                 if ((CurVoice >= START_FL) && (CurVoice <= END_FL))
                 {
                     PlaySeq = DINGDONG_READY_SEQ;
@@ -515,8 +515,8 @@ void main(void)
             }
             else
             {
-				/* --> ÁÖÀÇ ÀÌ Á¶°Ç¾È¿¡ µé¾î°¡¾ß µùµ¿ÀÌ ³ª¿Â´Ù. <--*/
-                if (((CurVoice >= START_FL) && (CurVoice <= END_FL)) || (CurVoice == FLOOR_P))   // Ãþ µµÂø !
+				/* --> ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½Ç¾È¿ï¿½ ï¿½ï¿½î°¡? ï¿½ï¿½?ï¿½ï¿½ ï¿½ï¿½?ï¿½ï¿½. <--*/
+                if (((CurVoice >= START_FL) && (CurVoice <= END_FL)) || (CurVoice == FLOOR_P))   // ? ï¿½ï¿½ï¿½ï¿½ !
                 {
                     PlaySeq = DINGDONG_PLAY_SEQ;
                     CurFloorVoice = CurVoice;
@@ -538,7 +538,7 @@ void main(void)
             }
             break;
         case DINGDONG_PLAY_SEQ:
-            SPI_Play(DINGDONG_MENT); // µµÂø ¾Ë¸² µùµ¿ !
+            SPI_Play(DINGDONG_MENT); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½? ï¿½ï¿½? !
             bDingdong = TRUE;
             PlaySeq = ALARM_PLAYING_SEQ;
             break;
@@ -567,7 +567,7 @@ void main(void)
             PlaySeq = CURVOICE_PLAYING_SEQ;
             break;
         case CURVOICE_PLAY_SEQ:
-            SPI_Play(CurVoice); // µµÂø '¸î ÃþÀÔ´Ù','¹®ÀÌ¿­¸³ÀÌ´Ù','´ÝÈü´Ï´Ù' µî ¾È³»¹æ¼Û Ãâ·Â
+            SPI_Play(CurVoice); // ï¿½ï¿½ï¿½ï¿½ 'ï¿½ï¿½ ?ï¿½Ô´ï¿½','ï¿½ï¿½ï¿½Ì¿ï¿½ï¿½ï¿½ï¿½Ì´ï¿½','ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½' ï¿½ï¿½ ï¿½È³ï¿½ï¿½ï¿½ï¿½ ??
             PlaySeq = CURVOICE_PLAYING_SEQ;
             break;
         case CURVOICE_PLAYING_SEQ:
@@ -595,7 +595,7 @@ void main(void)
             }
             break;
         case CALCEL_PLAY_SEQ:
-            SPI_Play(CANCLE_MENT); // µµÂø ¾Ë¸² µùµ¿ !
+            SPI_Play(CANCLE_MENT); // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½? ï¿½ï¿½? !
             PlaySeq = CURVOICE_PLAYING_SEQ;
             break;
         }
@@ -620,7 +620,7 @@ void main(void)
 
 
 //##################################//
-// ÀÎÅÍ·´Æ® ÇÔ¼ö			    	//
+// ï¿½ï¿½ï¿½Í·ï¿½Æ® ?ï¿½ï¿½			    	//
 //##################################//
 
 void interrupt isr(void)
@@ -680,7 +680,7 @@ void interrupt isr(void)
 #endif
 
 
-/* 232 ?œë¦¬??*/ 
+/* 232 ?ï¿½ë¦¬??*/ 
 
 	if((RCIE)&&(RCIF))										/*receive interrupt routine*/
 	{
@@ -711,7 +711,7 @@ void interrupt isr(void)
 
 
 //##################################//
-// ÀÏ¹Ý ÇÔ¼öµé                      				//
+// ï¿½Ï¹ï¿½ ?ï¿½ï¿½ï¿½ï¿½                      				//
 //##################################//
 
 
@@ -721,7 +721,7 @@ unsigned char GetFloorMent(void)
     unsigned char cDotDsp, bValid;
 
     bValid = TRUE;
-    // Dot1 Ã¼Å© (10ÀÇ ÀÚ¸®)
+    // Dot1 Ã¼Å© (10ï¿½ï¿½ ï¿½Ú¸ï¿½)
     cDotDsp = ELE_DSP1;
     if (cDotDsp == 'B')
     {
@@ -758,7 +758,7 @@ unsigned char GetFloorMent(void)
         tmMent = 0xff;
     }
 
-    // Dot2 Ã¼Å©(1ÀÇ ÀÚ¸®)
+    // Dot2 Ã¼Å©(1ï¿½ï¿½ ï¿½Ú¸ï¿½)
     if (bValid)
     {
         cDotDsp = ELE_DSP2;
@@ -830,7 +830,7 @@ unsigned char    GetVoice_Floor(unsigned char xTmpCurVoice, unsigned char xCurFl
 
     if (xCurFloorMent != 0xfe)
     {
-        if (ELE_bAUTO)   // ÀÚµ¿ !
+        if (ELE_bAUTO)   // ï¿½ï¿½? !
         {
             if (ELE_bFLOW)
             {
@@ -846,7 +846,7 @@ unsigned char    GetVoice_Floor(unsigned char xTmpCurVoice, unsigned char xCurFl
                 bmentSaveEnab = TRUE;
             }
         }
-        else   // ÀÚµ¿ÀÌ ¾Æ´Ñ °æ¿ì !
+        else   // ï¿½ï¿½?ï¿½ï¿½ ï¿½Æ´ï¿½ ï¿½ï¿½? !
         {
             if (xCurFloorMent != befFloorMent)
             {
@@ -859,7 +859,7 @@ unsigned char    GetVoice_Floor(unsigned char xTmpCurVoice, unsigned char xCurFl
     return xTmpCurVoice;
 }
 
-// ¹®ÀÌ ¿­¸³´Ï´Ù, ´ÝÈü´Ï´Ù, ¿Ã¶ó°©´Ï´Ù, ³»·Á°©´Ï´Ù.
+// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½, ?ï¿½ó°©´Ï´ï¿½, ï¿½ï¿½?ï¿½ï¿½ï¿½Ï´ï¿½.
 unsigned char   GetVoice_OpenCloseUpDn(unsigned char xTmpCurVoice)
 {
     static unsigned char xUpDnVoice = 0x0;
@@ -872,56 +872,56 @@ unsigned char   GetVoice_OpenCloseUpDn(unsigned char xTmpCurVoice)
     if (ELE_bPARKING_READY)
         return xTmpCurVoice;
 
-    if (ELE_bAUTO)   // ÀÚµ¿ !
+    if (ELE_bAUTO)   // ï¿½ï¿½? !
     {
-        // Up, Down ½Ã, À½¼º Ã³¸®
+        // Up, Down ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½
         if (ELE_bOPEN && (UpDnVoiceTimer > 40) 
 			&& xbOpened && (xbUpDned == FALSE))
         {
             if (ELE_bUP)
             {
-                xTmpCurVoice = UP_MENT; // ¿Ã¶ó°©´Ï´Ù !
+                xTmpCurVoice = UP_MENT; // ?ï¿½ó°©´Ï´ï¿½ !
                 xbUpDned = TRUE;
             }
             else if (ELE_bDOWN)
             {
-                xTmpCurVoice = DOWN_MENT; // ³»·Á °©´Ï´Ù !
+                xTmpCurVoice = DOWN_MENT; // ï¿½ï¿½? ï¿½ï¿½ï¿½Ï´ï¿½ !
                 xbUpDned = TRUE;
             }
         }
-        // Door Open ½Ã, À½¼º Ã³¸®
+        // Door Open ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½
         if (ELE_bCAR_MOVE)
         {
             UpDnVoiceTimer = 0;
             xbUpDned = FALSE;
         }      
 
-		// open Ãâ·ÂÀÌ ³ª°¥¶§ open ¸àÆ® ³ª°¡µµ·Ï ¼öÁ¤ 2017-03-09
+		// open ??ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ open ?Æ® ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½? ï¿½ï¿½ï¿½ï¿½ 2017-03-09
 		if ( (ELE_bOUT_OP) && (xbOpened == FALSE) && !bVoicePlaying )	//open
 		{
 			if (bOppositeDoor_Enab) 
 			{
 				bOppositeDoor_Enab = FALSE;
-				xTmpCurVoice = OPPOSITE_OPEN_MENT; // ¹Ý´ëÆí ¹®ÀÌ ¿­¸³´Ï´Ù.
+				xTmpCurVoice = OPPOSITE_OPEN_MENT; // ï¿½Ý´ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.
 			}
 			else	
 			{
-				xTmpCurVoice = OPEN_MENT; // ¹®ÀÌ ¿­¸³´Ï´Ù !
+				xTmpCurVoice = OPEN_MENT; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ !
 			}
 			xbOpened = TRUE;
 			UpDnVoiceTimer = 0;
 		}
-		else if (xbOpened && ELE_bOUT_CL)   // close : ¹®ÀÌ ÀÌ¹Ì ¿­·ÁÀÖ´Â »óÅÂ¿¡¼­ close Ãâ·ÂÀÌ ³ª¿À¸é 
+		else if (xbOpened && ELE_bOUT_CL)   // close : ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¹ï¿½ ï¿½ï¿½?ï¿½Ö´ï¿½ ?ï¿½Â¿ï¿½ï¿½ï¿½ close ??ï¿½ï¿½ ï¿½ï¿½?ï¿½ï¿½ 
 		{
-			xTmpCurVoice = CLOSE_MENT; // ¹®ÀÌ ´ÝÈü´Ï´Ù !
+			xTmpCurVoice = CLOSE_MENT; // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ !
 			xbOpened = FALSE;
 		}
 
 		
     }
-    else   // ÀÚµ¿ÀÌ ¾Æ´Ò ¶§ !
+    else   // ï¿½ï¿½?ï¿½ï¿½ ï¿½ï¿½? ï¿½ï¿½ !
     {
-        if (ELE_bCLOSE)   // ¹®ÀÌ ´ÝÇûÀ» ¶§ !
+        if (ELE_bCLOSE)   // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½?ï¿½ï¿½ ï¿½ï¿½ !
         {
             if (xbUpDned == FALSE)
             {
@@ -981,10 +981,10 @@ unsigned char   GetVoice_Song(unsigned char xBefVoice)
 unsigned char  GetVoice_BeepByBuz(unsigned char xTmpCurVoice)
 {
 
-    if (xTmpCurVoice != 0xff) // ÀÌ¹Ì ´Ù¸¥ À½¼ºÀÌ µî·ÏµÇ¾î ÀÖ´Ù¸é !
+    if (xTmpCurVoice != 0xff) // ï¿½Ì¹ï¿½ ï¿½Ù¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½?ï¿½Ç¾ï¿½ ï¿½Ö´Ù¸ï¿½ !
         return xTmpCurVoice;
 
-    if (ELE_bIN_BUZ) // ºÎÀú Ãâ·Â
+    if (ELE_bIN_BUZ) // ï¿½ï¿½ï¿½ï¿½ ??
     {
         if (CurVoice != BEEP_MENT)
             xTmpCurVoice = BEEP_MENT;
@@ -1003,7 +1003,7 @@ unsigned char    GetVoice_State(UCHAR xTmpCurVoice, UCHAR xCurVoice)
     if (xTmpCurVoice != NO_MENT)
         return xTmpCurVoice;
 
-    // ÆÄÅ·
+    // ï¿½ï¿½Å·
     if (ELE_bPARKING_READY  && (xCurVoice != PARKING_MENT))
     {
         xTmpCurVoice = PARKING_MENT;
@@ -1017,13 +1017,13 @@ unsigned char    GetVoice_State(UCHAR xTmpCurVoice, UCHAR xCurVoice)
         }
     }
 
-    // ¿À¹ö·Îµå
+    // ?ï¿½ï¿½?ï¿½ï¿½
     if ((ELE_bOPEN || ELE_bOPEN_SUB) && ELE_bOVERLOAD && (xCurVoice != OVERLOAD_MENT))
     {
         xTmpCurVoice = OVERLOAD_MENT;
     }
 
-    // È­Àç 
+    // È­ï¿½ï¿½ 
 	if (!ELE_bFIRE)
 	{
 		bHajaeMentEn = TRUE;
@@ -1039,8 +1039,8 @@ unsigned char    GetVoice_State(UCHAR xTmpCurVoice, UCHAR xCurVoice)
         xTmpCurVoice = HWAJAE_MENT;
     }
 
-    // ºñ»ó
-    // [151006] ÀÚµ¿½Ã¿¡¸¸ EMG MENT Ãâ·Â µÇµµ·Ï ¼öÁ¤
+    // ï¿½ï¿½?
+    // [151006] ï¿½ï¿½?ï¿½Ã¿ï¿½ï¿½ï¿½ EMG MENT ?? ï¿½Çµï¿½? ï¿½ï¿½ï¿½ï¿½
     if (ELE_bEMG  && (xCurVoice != EMERGENCY_MENT) && ELE_bIN_AT)
     {
         if (EmergencyVoiceCnt < 10)	EmergencyVoiceCnt++;
@@ -1050,7 +1050,7 @@ unsigned char    GetVoice_State(UCHAR xTmpCurVoice, UCHAR xCurVoice)
     if (ELE_bEMG == FALSE)
         EmergencyVoiceCnt = 0;
 
-    // ¹åµ¥¸®
+    // ï¿½åµ¥ï¿½ï¿½
     if (ELE_bBAT  && (xCurVoice != POWER_DOWN_MENT))
     {
         xTmpCurVoice = POWER_DOWN_MENT;
@@ -1067,7 +1067,7 @@ unsigned char    GetVoice_OverLoad(UCHAR xTmpCurVoice, UCHAR xCurVoice)
     if (xTmpCurVoice != 0xff)
         return xTmpCurVoice;
 
-    // ¿À¹ö·Îµå
+    // ?ï¿½ï¿½?ï¿½ï¿½
     if ((ELE_bOPEN || ELE_bOPEN_SUB) && ELE_bOVERLOAD)
     {
         bBeepEnab = FALSE;
@@ -1081,7 +1081,7 @@ unsigned char    GetVoice_OverLoad(UCHAR xTmpCurVoice, UCHAR xCurVoice)
 
 
 
-//Ä«¹öÆ° À½¼º Ã³¸®
+//Ä«ï¿½ï¿½Æ° ï¿½ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½
 unsigned char   GetVoice_CarCall(UCHAR xTmpCurVoice, UCHAR *xCurkey, UCHAR *xBefkey)
 {
     unsigned char j;
@@ -1104,19 +1104,19 @@ unsigned char   GetVoice_CarCall(UCHAR xTmpCurVoice, UCHAR *xCurkey, UCHAR *xBef
     j = 0;
     for (iFloor = 0; iFloor < 32; iFloor++)
     {
-        if (xCurkey[j] != xBefkey[j])   //8°³ÀÇ Ä«Å° »óÅÂ ºñ±³
+        if (xCurkey[j] != xBefkey[j])   //8ï¿½ï¿½ï¿½ï¿½ Ä«Å° ?ï¿½ï¿½ ï¿½ï¿½
         {
-            // ÇÑ °³ÀÇ Ä«Å° »óÅÂ ºñ±³
-            if ((xCurkey[j] & bitKey) &&  !(xBefkey[j] & bitKey)) // Ä«ÄÝ µî·ÏÀÌ¸é? (Âü && !°ÅÁþ)
+            // ? ï¿½ï¿½ï¿½ï¿½ Ä«Å° ?ï¿½ï¿½ ï¿½ï¿½
+            if ((xCurkey[j] & bitKey) &&  !(xBefkey[j] & bitKey)) // Ä«ï¿½ï¿½ ï¿½ï¿½?ï¿½Ì¸ï¿½? (ï¿½ï¿½ && !ï¿½ï¿½?)
             {
-                if (iFloor != (ELE_nCURFLOOR - 1)) // Ä«ÄÝ µî·Ï ÃþÀÌ ÇöÀç Ãþ°ú °°Áö ¾ÊÀ» ¶§´Â Ãâ·ÂÀ» ³»º¸³½´Ù. 
+                if (iFloor != (ELE_nCURFLOOR - 1)) // Ä«ï¿½ï¿½ ï¿½ï¿½? ?ï¿½ï¿½ ?ï¿½ï¿½ ?ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ??ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½. 
                 {
                     xBefkey[j] = (xBefkey[j] | bitKey);
                     xTmpCurVoice = GetCarCallMent(iFloor);
                 }
                 break;
             }
-            else if (!(xCurkey[j] & bitKey) && (xBefkey[j] & bitKey)) //Ä«ÄÝ Ãë¼ÒÀÌ¸é? (!°ÅÁþ && Âü)
+            else if (!(xCurkey[j] & bitKey) && (xBefkey[j] & bitKey)) //Ä«ï¿½ï¿½ ??ï¿½Ì¸ï¿½? (!ï¿½ï¿½? && ï¿½ï¿½)
             {
                 xBefkey[j] = (xBefkey[j] & ~bitKey);
 
@@ -1151,7 +1151,7 @@ unsigned char   GetVoice_CarCall(UCHAR xTmpCurVoice, UCHAR *xCurkey, UCHAR *xBef
 
 
 
-// Ä«ÄÝ Å° »óÅÂ °ªÀ» CurVoide¿¡ ÀúÀåÇÑ´Ù.
+// Ä«ï¿½ï¿½ Å° ?ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ CurVoideï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½.
 unsigned char    GetCarCallMent(unsigned char Call_Floor)
 {
     unsigned char   cDotDsp, i, bValid;
@@ -1209,9 +1209,9 @@ unsigned char    GetCarCallMent(unsigned char Call_Floor)
         }
         else if ((cDotDsp >= '1') && (cDotDsp <= '9'))
         {
-            if (tmMent == CARBTN_F1) // ÁöÇÏÃþÀÌ¸é?
+            if (tmMent == CARBTN_F1) // ï¿½ï¿½??ï¿½Ì¸ï¿½?
                 tmMent = tmMent - (cDotDsp - '0');
-            else // Áö»óÃþÀÌ¸é?
+            else // ï¿½ï¿½??ï¿½Ì¸ï¿½?
                 tmMent = tmMent + (cDotDsp - '0');
         }
         else
@@ -1272,7 +1272,7 @@ void    SetCarKeyCancel(void)
 }
 
 
-// À½¼º ´Ù¿î·Îµå
+// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½??ï¿½ï¿½
 void	WaitDownLoader(void)
 {
 
@@ -1334,7 +1334,7 @@ unsigned char SyncButtonCheck(unsigned char src)
 }
 
 
-// CarKey µî·Ï
+// CarKey ï¿½ï¿½?
 void    MyLampCheck(void)
 {
     unsigned int i, j;
@@ -1394,7 +1394,7 @@ void    MyLampCheck(void)
 }
 
 
-// CAR CALL À½¼ºÀ» À§ÇÑ ¿¤¸®º£ÀÌÅÍ °¢Ãþ µð½ºÇÃ·¹ÀÌ °ª ÀúÀå
+// CAR CALL ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½? ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½? ï¿½ï¿½?ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 unsigned char DspCharRdWr(void)
 {
     unsigned char   CurFlrNum;
@@ -1464,7 +1464,7 @@ void  Serial2Check(void)
 }
 
 
-
+unsigned char myData[16] = {0,};
 volatile int mytest_cnt=0;
 
 volatile uchar checksum1;
@@ -1473,7 +1473,7 @@ void    TestVoicePlay(void)
     unsigned bBusy;
 	uchar status;	
 
-    _VOICE_ACT = VOICE_OFF; // ë¦¬ì…‹ ?˜ì´ : RFID ?•ìƒ ?™ìž‘ 
+    _VOICE_ACT = VOICE_OFF; // ë¦¬ï¿½? ?ï¿½ì´ : RFID ?ï¿½ìƒ ?ï¿½ìž‘ 
 
 	AddicoreRFID_Init();
 
@@ -1494,34 +1494,35 @@ void    TestVoicePlay(void)
 			}
 		}
 
-		// RFID ?œê·¸???€?…ì„ ë¦¬í„´
+		// RFID ?ï¿½ê·¸???ï¿½??ï¿½ï¿½ ë¦¬ï¿½?
 		status = AddicoreRFID_Request(PICC_REQIDL, str);    
-		if (status == MI_OK)    // MIFARE ì¹´ë“œ?¼ë•Œë§??‘ë™
+		if (status == MI_OK)    // MIFARE ì¹´ë“œ?ï¿½ë•Œï¿½??ï¿½ë™
 		{
 			//mytest = str[0];
 			//mytest1 = str[1];
 		}	
 
-		// RFID ì¶©ëŒë°©ì?, RFID ?œê·¸??IDê°??œë¦¬?¼ë„˜ë²? ???€?¥ëœ ê°’ì„ ë¦¬í„´?? 4Byte
+		//RFID ì¶©ëŒë°©ì§€, RFID íƒœê·¸ì˜ IDê°’(ì‹œë¦¬ì–¼ë„˜ë²„) ë“± ì €ìž¥ëœ ê°’ì„ ë¦¬í„´í•¨. 4Byte
     	status = AddicoreRFID_Anticoll(str);
-    	if (status == MI_OK)      // MIFARE ì¹´ë“œ?¼ë•Œë§??‘ë™
-    	{			
+    	if (status == MI_OK)      // MIFARE ì¹´ë“œ?ï¿½ë•Œï¿½??ï¿½ë™
+    	{		
+			checksum1 	= str[0] ^ str[1] ^ str[2] ^ str[3];
+		
          	mytest 		= str[0];
 			mytest1 	= str[1];			
 			mytest2 	= str[2];
 			mytest3 	= str[3];
-			checksum1 	= str[0] ^ str[1] ^ str[2] ^ str[3];
+			
 
 			Com1TxStartStr();
 
 			mytest_cnt++;
-			DelayMs(1000);
-
-			
-			
+			DelayMs(1000);			
     	}
 
-		AddicoreRFID_Halt();  // ?™ìž‘ ì¤‘ì? ?œí‚¤??ê±´ë° ?™ìž‘ ?ˆí•˜?”ê±° ê°™ë‹¤. 
+
+
+		AddicoreRFID_Halt();  // ?ï¿½ìž‘ ì¤‘ï¿½? ?ï¿½ï¿½??ê±´ë° ?ï¿½ìž‘ ?ï¿½í•˜?ï¿½ê±° ê°™ë‹¤. 
     }
 
 }
@@ -1662,7 +1663,7 @@ void SetDipSW()
 
 unsigned char VoiceBusy(void)
 {
-    if (SPI_Play_Status_Chk()) // À½¼º¸àÆ® ¹æ¼ÛÁßÀÌ¸é OUT1 LED¿¡ ºÒÀÌ µé¾î¿Â´Ù.
+    if (SPI_Play_Status_Chk()) // ï¿½ï¿½ï¿½ï¿½?Æ® ï¿½ï¿½ï¿½?ï¿½Ì¸ï¿½ OUT1 LEDï¿½ï¿½ ?ï¿½ï¿½ ï¿½ï¿½ï¿½?ï¿½ï¿½.
         return TRUE;
     else
         return FALSE;
@@ -1722,9 +1723,9 @@ void InitVoice(void)
 
 void SetVoice(void)
 {
-    bSetAfterCancel = TRUE; // Ä«ÄÝ Ãë¼Ò½Ã Ãþ¸àÆ® ÈÄ Ãë¼Ò ³ª¿À°Ô ÇÒÁö ¿©ºÎ 
-    bSetSong = FALSE; // ÁÖÇà Áß À½¾Ç 
-	bSetOppositeDoor = FALSE; // ¹Ý´ëÆí ¹®ÀÌ ¿­¸³´Ï´Ù.
+    bSetAfterCancel = TRUE; // Ä«ï¿½ï¿½ ??ï¿½ï¿½ ??Æ® ï¿½ï¿½ ?? ï¿½ï¿½?ï¿½ï¿½ ?ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ 
+    bSetSong = FALSE; // ï¿½ï¿½? ? ï¿½ï¿½ï¿½ï¿½ 
+	bSetOppositeDoor = FALSE; // ï¿½Ý´ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.
 }
 
 

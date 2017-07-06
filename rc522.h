@@ -137,6 +137,9 @@ void SetBitMask(byte reg, byte mask);
 extern byte AddicoreRFID_Anticoll(byte *serNum);
 extern void CalulateCRC(byte *pIndata, byte len, byte *pOutData);
 extern void AddicoreRFID_Halt(void);
+byte AddicoreRFID_Write(byte blockAddr, byte *_writeData);
+byte AddicoreRFID_Read(byte blockAddr, byte *recvData);
+
 
 
 

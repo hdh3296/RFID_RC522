@@ -79,6 +79,20 @@ void ClearBitMask(byte reg, byte mask)
     Write_AddicoreRFID(reg, tmp & (~mask));  // clear bit mask
 } 
 
+
+
+/*
+ * Function Name: AddicoreRFID_Request
+ * Description: Find cards, read the card type number
+ * Input parameters: reqMode - find cards way
+ *			 TagType - Return Card Type
+ *			 	0x4400 = Mifare_UltraLight
+ *				0x0400 = Mifare_One(S50)
+ *				0x0200 = Mifare_One(S70)
+ *				0x0800 = Mifare_Pro(X)
+ *				0x4403 = Mifare_DESFire
+ * Return value: the successful return MI_OK
+ */
 byte AddicoreRFID_Request(byte reqMode, byte *TagType)
 {
 	byte status;  
@@ -95,6 +109,19 @@ byte AddicoreRFID_Request(byte reqMode, byte *TagType)
   
 	return status;
 }
+
+
+
+/*
+ * Function Name: AddicoreRFID_ToCard
+ * Description: RC522 and ISO14443 card communication
+ * Input Parameters: command - MF522 command word,
+ *			 sendData--RC522 sent to the card by the data
+ *			 sendLen--Length of data sent	 
+ *			 backData--Data returned from the card
+ *			 backLen--Returned data bit length
+ * Return value: the successful return MI_OK
+ */
 
 byte n;
 byte AddicoreRFID_ToCard(byte command, byte *sendData, byte sendLen, 
@@ -303,6 +330,80 @@ void AddicoreRFID_Halt(void)
  
     status = AddicoreRFID_ToCard(PCD_TRANSCEIVE, buff, 4, buff,&unLen);
 }
+
+
+/*
+ * Function Name: AddicoreRFID_Read
+ * Description: Read block data
+ * Input parameters: blockAddr - block address; recvData - read block data
+ * Return value: the successful return MI_OK
+ */
+byte AddicoreRFID_Read(byte blockAddr, byte *recvData)
+{
+    byte status;
+    uint unLen;
+
+    recvData[0] = PICC_READ;
+    recvData[1] = blockAddr;
+    CalulateCRC(recvData,2, &recvData[2]);
+    status = AddicoreRFID_ToCard(PCD_TRANSCEIVE, recvData, 4, recvData, &unLen);
+
+    if ((status != MI_OK) || (unLen != 0x90))
+    {
+        status = MI_ERR;
+    }
+	else if (status == MI_OK)
+	{
+		status == MI_OK;
+	}
+    
+    return status;
+}
+
+
+
+/*
+ * Function Name: AddicoreRFID_Write
+ * Description: Write block data
+ * Input parameters: blockAddr - block address; writeData - to 16-byte data block write
+ * Return value: the successful return MI_OK
+ */
+byte AddicoreRFID_Write(byte blockAddr, byte *_writeData)
+{
+    byte status;
+    uint recvBits;
+    byte i;
+	byte buff[18]; 
+    
+    buff[0] = PICC_WRITE;
+    buff[1] = blockAddr;
+    CalulateCRC(buff, 2, &buff[2]);
+    status = AddicoreRFID_ToCard(PCD_TRANSCEIVE, buff, 4, buff, &recvBits);
+
+    if ((status != MI_OK) || (recvBits != 4) || ((buff[0] & 0x0F) != 0x0A))
+    {   
+		status = MI_ERR;   
+	}
+        
+    if (status == MI_OK)
+    {
+        for (i=0; i<16; i++)		//Data to the FIFO write 16Byte
+        {    
+        	buff[i] = *(_writeData+i);   
+        }
+        CalulateCRC(buff, 16, &buff[16]);
+        status = AddicoreRFID_ToCard(PCD_TRANSCEIVE, buff, 18, buff, &recvBits);
+        
+		if ((status != MI_OK) || (recvBits != 4) || ((buff[0] & 0x0F) != 0x0A))
+        {   
+			status = MI_ERR;   
+		}
+    }
+    
+    return status;
+}
+
+
 
 
 #endif	
