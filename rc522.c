@@ -449,5 +449,259 @@ void PCD_AntennaOn(void)
 
 
 
+/**
+ * Returns true if a PICC responds to PICC_CMD_REQA.
+ * Only "new" cards in state IDLE are invited. Sleeping cards in state HALT are ignored.
+ * 
+ * @return bool
+ */
+
+volatile byte bbb = 0x44;
+byte PICC_IsNewCardPresent(void) 
+{
+	byte bufferATQA[2];
+	byte bufferSize = 2;
+	byte result;
+
+	// Reset baud rates
+	PCD_WriteRegister(TxModeReg, 0x00);
+	PCD_WriteRegister(RxModeReg, 0x00);
+	// Reset ModWidthReg
+	PCD_WriteRegister(ModWidthReg, 0x26);
+
+	result = PICC_RequestA(bufferATQA, bufferSize);
+	bbb = result;
+	
+	return (result == STATUS_OK || result == STATUS_COLLISION);
+} // End PICC_IsNewCardPresent()
+
+/**
+ * Transmits a REQuest command, Type A. Invites PICCs in state IDLE to go to READY and prepare for anticollision or selection. 7 bit frame.
+ * Beware: When two PICCs are in the field at the same time I often get STATUS_TIMEOUT - probably due do bad antenna design.
+ * 
+ * @return STATUS_OK on success, STATUS_??? otherwise.
+ */
+byte PICC_RequestA(	byte *bufferATQA,	///< The buffer to store the ATQA (Answer to request) in
+											byte bufferSize	///< Buffer size, at least two bytes. Also number of bytes returned if STATUS_OK.
+										) {
+	return PICC_REQA_or_WUPA(PICC_CMD_REQA, bufferATQA, bufferSize);
+} // End PICC_RequestA()
+
+
+/**
+ * Transmits REQA or WUPA commands.
+ * Beware: When two PICCs are in the field at the same time I often get STATUS_TIMEOUT - probably due do bad antenna design.
+ * 
+ * @return STATUS_OK on success, STATUS_??? otherwise.
+ */ 
+byte PICC_REQA_or_WUPA(	byte command, 		///< The command to send - PICC_CMD_REQA or PICC_CMD_WUPA
+												byte *bufferATQA,	///< The buffer to store the ATQA (Answer to request) in
+												byte bufferSize	///< Buffer size, at least two bytes. Also number of bytes returned if STATUS_OK.
+											) {
+	byte validBits;
+	byte status;
+	
+	if (bufferSize < 2) {	// The ATQA response is 2 bytes long.
+		return STATUS_NO_ROOM;
+	}
+	PCD_ClearRegisterBitMask(CollReg, 0x80);		// ValuesAfterColl=1 => Bits received after collision are cleared.
+	validBits = 7;									// For REQA and WUPA we need the short frame format - transmit only 7 bits of the last (and only) byte. TxLastBits = BitFramingReg[2..0]
+	status = PCD_TransceiveData(&command, 1, bufferATQA, bufferSize, &validBits, 0, false);
+	if (status != STATUS_OK) {
+		return status;
+	}
+	if (bufferSize != 2 || validBits != 0) {		// ATQA must be exactly 16 bits.
+		return STATUS_ERROR;
+	}
+	return STATUS_OK;
+} // End PICC_REQA_or_WUPA()
+
+
+/**
+ * Clears the bits given in mask from register reg.
+ */
+void PCD_ClearRegisterBitMask(	unsigned char reg,	///< The register to update. One of the PCD_Register enums.
+										byte mask			///< The bits to clear.
+									  ) {
+	byte tmp;
+	tmp = PCD_ReadRegister(reg);
+	PCD_WriteRegister(reg, tmp & (~mask));		// clear bit mask
+} // End PCD_ClearRegisterBitMask()
+
+
+/**
+ * Executes the Transceive command.
+ * CRC validation can only be done if backData and backLen are specified.
+ * 
+ * @return STATUS_OK on success, STATUS_??? otherwise.
+ */
+byte PCD_TransceiveData(	byte *sendData,		///< Pointer to the data to transfer to the FIFO.
+													byte sendLen,		///< Number of bytes to transfer to the FIFO.
+													byte *backData,		///< nullptr or pointer to buffer if data should be read back after executing the command.
+													byte backLen,		///< In: Max number of bytes to write to *backData. Out: The number of bytes returned.
+													byte *validBits,	///< In/Out: The number of valid bits in the last byte. 0 for 8 valid bits. Default nullptr.
+													byte rxAlign,		///< In: Defines the bit position in backData[0] for the first bit received. Default 0.
+													byte checkCRC		///< In: True => The last two bytes of the response is assumed to be a CRC_A that must be validated. Default false
+								 ) {
+	byte waitIRq = 0x30;		// RxIRq and IdleIRq
+	return PCD_CommunicateWithPICC(PCD_Transceive, waitIRq, sendData, sendLen, backData, backLen, validBits, 
+													rxAlign, checkCRC);
+} // End PCD_TransceiveData()
+
+
+/**
+ * Transfers data to the MFRC522 FIFO, executes a command, waits for completion and transfers data back from the FIFO.
+ * CRC validation can only be done if backData and backLen are specified.
+ *
+ * @return STATUS_OK on success, STATUS_??? otherwise.
+ */
+byte PCD_CommunicateWithPICC(	byte command,		///< The command to execute. One of the PCD_Command enums.
+														byte waitIRq,		///< The bits in the ComIrqReg register that signals successful completion of the command.
+														byte *sendData,		///< Pointer to the data to transfer to the FIFO.
+														byte sendLen,		///< Number of bytes to transfer to the FIFO.
+														byte *backData,		///< nullptr or pointer to buffer if data should be read back after executing the command.
+														byte backLen,		///< In: Max number of bytes to write to *backData. Out: The number of bytes returned.
+														byte *validBits,	///< In/Out: The number of valid bits in the last byte. 0 for 8 valid bits.
+														byte rxAlign,		///< In: Defines the bit position in backData[0] for the first bit received. Default 0.
+														byte checkCRC		///< In: True => The last two bytes of the response is assumed to be a CRC_A that must be validated.
+									 ) {
+	unsigned int i;
+	unsigned char status;
+									 
+	// Prepare values for BitFramingReg
+	byte txLastBits = validBits ? *validBits : 0;
+	byte bitFraming = (rxAlign << 4) + txLastBits;		// RxAlign = BitFramingReg[6..4]. TxLastBits = BitFramingReg[2..0]
+	
+	PCD_WriteRegister(CommandReg, PCD_Idle);			// Stop any active command.
+	PCD_WriteRegister(ComIrqReg, 0x7F);					// Clear all seven interrupt request bits
+	PCD_WriteRegister(FIFOLevelReg, 0x80);				// FlushBuffer = 1, FIFO initialization
+	PCD_WriteRegister_A(FIFODataReg, sendLen, sendData);	// Write sendData to the FIFO
+	PCD_WriteRegister(BitFramingReg, bitFraming);		// Bit adjustments
+	PCD_WriteRegister(CommandReg, command);				// Execute the command
+	if (command == PCD_Transceive) {
+		PCD_SetRegisterBitMask(BitFramingReg, 0x80);	// StartSend=1, transmission of data starts
+	}
+	
+	// Wait for the command to complete.
+	// In PCD_Init() we set the TAuto flag in TModeReg. This means the timer automatically starts when the PCD stops transmitting.
+	// Each iteration of the do-while-loop takes 17.86μs.
+	// TODO check/modify for other architectures than Arduino Uno 16bit
+	
+	for (i = 2000; i > 0; i--) {
+		byte n = PCD_ReadRegister(ComIrqReg);	// ComIrqReg[7..0] bits are: Set1 TxIRq RxIRq IdleIRq HiAlertIRq LoAlertIRq ErrIRq TimerIRq
+		if (n & waitIRq) {					// One of the interrupts that signal success has been set.
+			break;
+		}
+		if (n & 0x01) {						// Timer interrupt - nothing received in 25ms
+			return STATUS_TIMEOUT;
+		}
+	}
+	// 35.7ms and nothing happend. Communication with the MFRC522 might be down.
+	if (i == 0) {
+		return STATUS_TIMEOUT;
+	}
+	
+	// Stop now if any errors except collisions were detected.
+	byte errorRegValue = PCD_ReadRegister(ErrorReg); // ErrorReg[7..0] bits are: WrErr TempErr reserved BufferOvfl CollErr CRCErr ParityErr ProtocolErr
+	if (errorRegValue & 0x13) {	 // BufferOvfl ParityErr ProtocolErr
+		return STATUS_ERROR;
+	}
+  
+	byte _validBits = 0;
+	
+	// If the caller wants data back, get it from the MFRC522.
+	if (backData && backLen) {
+		byte n = PCD_ReadRegister(FIFOLevelReg);	// Number of bytes in the FIFO
+		if (n > backLen) {
+			return STATUS_NO_ROOM;
+		}
+		backLen = n;											// Number of bytes returned
+		PCD_ReadRegister_A(FIFODataReg, n, backData, rxAlign);	// Get received data from FIFO
+		_validBits = PCD_ReadRegister(ControlReg) & 0x07;		// RxLastBits[2:0] indicates the number of valid bits in the last received byte. If this value is 000b, the whole byte is valid.
+		if (validBits) {
+			*validBits = _validBits;
+		}
+	}
+	
+	// Tell about collisions
+	if (errorRegValue & 0x08) {		// CollErr
+		return STATUS_COLLISION;
+	}
+	
+	// Perform CRC_A validation if requested.
+	if (backData && backLen && checkCRC) {
+		// In this case a MIFARE Classic NAK is not OK.
+		if (backLen == 1 && _validBits == 4) {
+			return STATUS_MIFARE_NACK;
+		}
+		// We need at least the CRC_A value and all 8 bits of the last byte must be received.
+		if (backLen < 2 || _validBits != 0) {
+			return STATUS_CRC_WRONG;
+		}
+		// Verify CRC_A - do our own calculation and store the control in controlBuffer.
+		byte controlBuffer[2];
+		status = PCD_CalculateCRC(&backData[0], backLen - 2, &controlBuffer[0]);
+		if (status != STATUS_OK) {
+			return status;
+		}
+		if ((backData[backLen - 2] != controlBuffer[0]) || (backData[backLen - 1] != controlBuffer[1])) {
+			return STATUS_CRC_WRONG;
+		}
+	}
+	
+	return STATUS_OK;
+} // End PCD_CommunicateWithPICC()
+
+
+
+/**
+ * Use the CRC coprocessor in the MFRC522 to calculate a CRC_A.
+ * 
+ * @return STATUS_OK on success, STATUS_??? otherwise.
+ */
+byte PCD_CalculateCRC(	byte *data,		///< In: Pointer to the data to transfer to the FIFO for CRC calculation.
+												byte length,	///< In: The number of bytes to transfer.
+												byte *result	///< Out: Pointer to result buffer. Result is written to result[0..1], low byte first.
+					 ) {
+	unsigned int i;
+					 
+	PCD_WriteRegister(CommandReg, PCD_Idle);		// Stop any active command.
+	PCD_WriteRegister(DivIrqReg, 0x04);				// Clear the CRCIRq interrupt request bit
+	PCD_WriteRegister(FIFOLevelReg, 0x80);			// FlushBuffer = 1, FIFO initialization
+	PCD_WriteRegister_A(FIFODataReg, length, data);	// Write data to the FIFO
+	PCD_WriteRegister(CommandReg, PCD_CalcCRC);		// Start the calculation
+	
+	// Wait for the CRC calculation to complete. Each iteration of the while-loop takes 17.73μs.
+	// TODO check/modify for other architectures than Arduino Uno 16bit
+
+	// Wait for the CRC calculation to complete. Each iteration of the while-loop takes 17.73us.
+	for (i = 5000; i > 0; i--) {
+		// DivIrqReg[7..0] bits are: Set2 reserved reserved MfinActIRq reserved CRCIRq reserved reserved
+		byte n = PCD_ReadRegister(DivIrqReg);
+		if (n & 0x04) {									// CRCIRq bit set - calculation done
+			PCD_WriteRegister(CommandReg, PCD_Idle);	// Stop calculating CRC for new content in the FIFO.
+			// Transfer the result from the registers to the result buffer
+			result[0] = PCD_ReadRegister(CRCResultRegL);
+			result[1] = PCD_ReadRegister(CRCResultRegH);
+			return STATUS_OK;
+		}
+	}
+	// 89ms passed and nothing happend. Communication with the MFRC522 might be down.
+	return STATUS_TIMEOUT;
+} // End PCD_CalculateCRC()
+
+
+/**
+ * Sets the bits given in mask in register reg.
+ */
+void PCD_SetRegisterBitMask(	unsigned char reg,	///< The register to update. One of the PCD_Register enums.
+										byte mask			///< The bits to set.
+									) { 
+	byte tmp;
+	tmp = PCD_ReadRegister(reg);
+	PCD_WriteRegister(reg, tmp | mask);			// set bit mask
+} // End PCD_SetRegisterBitMask()
+
+
 
 #endif	

@@ -19,7 +19,16 @@ unsigned char  Write_AddicoreRFID(unsigned char addr,unsigned char thisdata);
 unsigned char  Read_AddicoreRFID(unsigned char addr);
 unsigned char PCD_WriteRegister(unsigned char reg, byte value);
 unsigned char PCD_ReadRegister( unsigned char reg);
+unsigned char  PCD_WriteRegister_A(	unsigned char reg,	///< The register to write to. One of the PCD_Register enums.
+									byte count,			///< The number of bytes to write to the register
+									byte *values		///< The values to write. Byte array.
+								);
 
+unsigned char PCD_ReadRegister_A(	unsigned char reg,	///< The register to read from. One of the PCD_Register enums.
+								byte count,			///< The number of bytes to read
+								byte *values,		///< Byte array to store the values in.
+								byte rxAlign		///< Only bit positions rxAlign..7 in values[0] are updated.
+								);
 
 
 

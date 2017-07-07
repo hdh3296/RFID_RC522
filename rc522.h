@@ -50,6 +50,7 @@
 //Page 2: Configuration  
 #define     Reserved20          0x20  // reserved for future use
 #define     CRCResultRegM       0x21  // shows the MSB values of the CRC calculation
+#define		CRCResultRegH		0x21
 #define     CRCResultRegL       0x22  // shows the LSB values of the CRC calculation
 #define     Reserved21          0x23  // reserved for future use
 #define     ModWidthReg         0x24  // controls the ModWidth setting
@@ -131,6 +132,64 @@
 #define true	1
 
 
+// Return codes from the functions in this class. Remember to update GetStatusCodeName() if you add more.
+// last value set to 0xff, then compiler uses less ram, it seems some optimisations are triggered
+typedef enum {
+	STATUS_OK				,	// Success
+	STATUS_ERROR			,	// Error in communication
+	STATUS_COLLISION		,	// Collission detected
+	STATUS_TIMEOUT			,	// Timeout in communication.
+	STATUS_NO_ROOM			,	// A buffer is not big enough.
+	STATUS_INTERNAL_ERROR	,	// Internal error in the code. Should not happen ;-)
+	STATUS_INVALID			,	// Invalid argument.
+	STATUS_CRC_WRONG		,	// The CRC_A does not match
+	STATUS_MIFARE_NACK		= 0xff	// A MIFARE PICC responded with NAK.
+} StatusCode;
+
+
+// Commands sent to the PICC.
+typedef enum {
+	// The commands used by the PCD to manage communication with several PICCs (ISO 14443-3, Type A, section 6.4)
+	PICC_CMD_REQA			= 0x26,		// REQuest command, Type A. Invites PICCs in state IDLE to go to READY and prepare for anticollision or selection. 7 bit frame.
+	PICC_CMD_WUPA			= 0x52,		// Wake-UP command, Type A. Invites PICCs in state IDLE and HALT to go to READY(*) and prepare for anticollision or selection. 7 bit frame.
+	PICC_CMD_CT				= 0x88,		// Cascade Tag. Not really a command, but used during anti collision.
+	PICC_CMD_SEL_CL1		= 0x93,		// Anti collision/Select, Cascade Level 1
+	PICC_CMD_SEL_CL2		= 0x95,		// Anti collision/Select, Cascade Level 2
+	PICC_CMD_SEL_CL3		= 0x97,		// Anti collision/Select, Cascade Level 3
+	PICC_CMD_HLTA			= 0x50,		// HaLT command, Type A. Instructs an ACTIVE PICC to go to state HALT.
+	PICC_CMD_RATS           = 0xE0,     // Request command for Answer To Reset.
+	// The commands used for MIFARE Classic (from http://www.mouser.com/ds/2/302/MF1S503x-89574.pdf, Section 9)
+	// Use PCD_MFAuthent to authenticate access to a sector, then use these commands to read/write/modify the blocks on the sector.
+	// The read/write commands can also be used for MIFARE Ultralight.
+	PICC_CMD_MF_AUTH_KEY_A	= 0x60,		// Perform authentication with Key A
+	PICC_CMD_MF_AUTH_KEY_B	= 0x61,		// Perform authentication with Key B
+	PICC_CMD_MF_READ		= 0x30,		// Reads one 16 byte block from the authenticated sector of the PICC. Also used for MIFARE Ultralight.
+	PICC_CMD_MF_WRITE		= 0xA0,		// Writes one 16 byte block to the authenticated sector of the PICC. Called "COMPATIBILITY WRITE" for MIFARE Ultralight.
+	PICC_CMD_MF_DECREMENT	= 0xC0,		// Decrements the contents of a block and stores the result in the internal data register.
+	PICC_CMD_MF_INCREMENT	= 0xC1,		// Increments the contents of a block and stores the result in the internal data register.
+	PICC_CMD_MF_RESTORE		= 0xC2,		// Reads the contents of a block into the internal data register.
+	PICC_CMD_MF_TRANSFER	= 0xB0,		// Writes the contents of the internal data register to a block.
+	// The commands used for MIFARE Ultralight (from http://www.nxp.com/documents/data_sheet/MF0ICU1.pdf, Section 8.6)
+	// The PICC_CMD_MF_READ and PICC_CMD_MF_WRITE can also be used for MIFARE Ultralight.
+	PICC_CMD_UL_WRITE		= 0xA2		// Writes one 4 byte page to the PICC.
+} PICC_Command;
+
+
+// MFRC522 commands. Described in chapter 10 of the datasheet.
+typedef enum { 
+	PCD_Idle				= 0x00, 	// no action, cancels current command execution
+	PCD_Mem 				= 0x01, 	// stores 25 bytes into the internal buffer
+	PCD_GenerateRandomID	= 0x02, 	// generates a 10-byte random ID number
+	PCD_CalcCRC 			= 0x03, 	// activates the CRC coprocessor or performs a self-test
+	PCD_Transmit			= 0x04, 	// transmits data from the FIFO buffer
+	PCD_NoCmdChange 		= 0x07, 	// no command change, can be used to modify the CommandReg register bits without affecting the command, for example, the PowerDown bit
+	PCD_Receive 			= 0x08, 	// activates the receiver circuits
+	PCD_Transceive			= 0x0C, 	// transmits data from FIFO buffer to antenna and automatically activates the receiver after transmission
+	PCD_MFAuthent			= 0x0E, 	// performs the MIFARE standard authentication as a reader
+	PCD_SoftReset			= 0x0F		// resets the MFRC522
+} PCD_Command;
+
+
 uint _RxBits;		  // The number of received data bits
 
 byte AddicoreRFID_Request(byte reqMode, byte *TagType);
@@ -148,7 +207,46 @@ byte AddicoreRFID_Read(byte blockAddr, byte *recvData);
 
 void PCD_Init(void);
 void PCD_AntennaOn(void);
+byte PICC_IsNewCardPresent(void);
+byte PICC_RequestA(	byte *bufferATQA,	///< The buffer to store the ATQA (Answer to request) in
+											byte bufferSize	///< Buffer size, at least two bytes. Also number of bytes returned if STATUS_OK.
+										);
 
+byte PICC_REQA_or_WUPA(	byte command, 		///< The command to send - PICC_CMD_REQA or PICC_CMD_WUPA
+												byte *bufferATQA,	///< The buffer to store the ATQA (Answer to request) in
+												byte bufferSize	///< Buffer size, at least two bytes. Also number of bytes returned if STATUS_OK.
+											);
 
+void PCD_ClearRegisterBitMask(	unsigned char reg,	///< The register to update. One of the PCD_Register enums.
+										byte mask			///< The bits to clear.
+									  );
+
+byte PCD_TransceiveData(	byte *sendData,		///< Pointer to the data to transfer to the FIFO.
+													byte sendLen,		///< Number of bytes to transfer to the FIFO.
+													byte *backData,		///< nullptr or pointer to buffer if data should be read back after executing the command.
+													byte backLen,		///< In: Max number of bytes to write to *backData. Out: The number of bytes returned.
+													byte *validBits,	///< In/Out: The number of valid bits in the last byte. 0 for 8 valid bits. Default nullptr.
+													byte rxAlign,		///< In: Defines the bit position in backData[0] for the first bit received. Default 0.
+													byte checkCRC		///< In: True => The last two bytes of the response is assumed to be a CRC_A that must be validated. Default false
+								 );
+byte PCD_CommunicateWithPICC(	byte command,		///< The command to execute. One of the PCD_Command enums.
+														byte waitIRq,		///< The bits in the ComIrqReg register that signals successful completion of the command.
+														byte *sendData,		///< Pointer to the data to transfer to the FIFO.
+														byte sendLen,		///< Number of bytes to transfer to the FIFO.
+														byte *backData,		///< nullptr or pointer to buffer if data should be read back after executing the command.
+														byte backLen,		///< In: Max number of bytes to write to *backData. Out: The number of bytes returned.
+														byte *validBits,	///< In/Out: The number of valid bits in the last byte. 0 for 8 valid bits.
+														byte rxAlign,		///< In: Defines the bit position in backData[0] for the first bit received. Default 0.
+														byte checkCRC		///< In: True => The last two bytes of the response is assumed to be a CRC_A that must be validated.
+									 );
+
+byte PCD_CalculateCRC(	byte *data,		///< In: Pointer to the data to transfer to the FIFO for CRC calculation.
+												byte length,	///< In: The number of bytes to transfer.
+												byte *result	///< Out: Pointer to result buffer. Result is written to result[0..1], low byte first.
+					 );
+
+void PCD_SetRegisterBitMask(	unsigned char reg,	///< The register to update. One of the PCD_Register enums.
+										byte mask			///< The bits to set.
+									);
 
 
