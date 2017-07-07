@@ -190,6 +190,17 @@ typedef enum {
 } PCD_Command;
 
 
+// A struct used for passing the UID of a PICC.
+typedef struct {
+	byte		size;			// Number of bytes in the UID. 4, 7 or 10.
+	byte		uidByte[10];
+	byte		sak;			// The SAK (Select acknowledge) byte returned from the PICC after successful selection.
+} Uid;
+
+// Member variables
+Uid uid;	// Used by PICC_ReadCardSerial().
+
+
 uint _RxBits;		  // The number of received data bits
 
 byte AddicoreRFID_Request(byte reqMode, byte *TagType);
@@ -248,5 +259,10 @@ byte PCD_CalculateCRC(	byte *data,		///< In: Pointer to the data to transfer to 
 void PCD_SetRegisterBitMask(	unsigned char reg,	///< The register to update. One of the PCD_Register enums.
 										byte mask			///< The bits to set.
 									);
+
+byte PICC_ReadCardSerial(void);
+byte PICC_Select(	Uid *uid,			///< Pointer to Uid struct. Normally output, but can also be used to supply a known UID.
+						byte validBits		///< The number of known UID bits supplied in *uid. Normally 0. If set you must also supply uid->size.
+						);
 
 

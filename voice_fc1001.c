@@ -1478,7 +1478,9 @@ byte dataBlock[]    = {
 byte buffer[18] = {0,};
 
 	
-volatile byte aaa = 0x11;
+volatile byte aaa = 0x44;
+volatile byte ccc = 0x44;
+
 void    TestVoicePlay(void)
 {
     unsigned bBusy;
@@ -1512,26 +1514,23 @@ void    TestVoicePlay(void)
 		}
 		*/
 		aaa = PICC_IsNewCardPresent();
-		
+		if (aaa) {
+			DelayUs(100);
+		}
+
+		/*
+		// Select one of the cards
+		if ( ! PICC_ReadCardSerial()) {
+			return;
+		}
+		*/
+		ccc = PICC_ReadCardSerial();
+		if (ccc) {
+			DelayUs(100);
+		}
 
 
-		//RFID 충돌방지, RFID 태그의 ID값(시리얼넘버) 등 저장된 값을 리턴함. 4Byte
-    	status = AddicoreRFID_Anticoll(str);
-    	if (status == MI_OK)      // MIFARE 카드?�때�??�동
-    	{		
-			checksum1 	= str[0] ^ str[1] ^ str[2] ^ str[3];
-		
-         	mytest 		= str[0];
-			mytest1 	= str[1];			
-			mytest2 	= str[2];
-			mytest3 	= str[3];
-			
 
-			Com1TxStartStr();
-
-			mytest_cnt++;
-			DelayMs(1000);			
-    	}
 
 
 		AddicoreRFID_Halt();  // ?�작 중�? ?��??건데 ?�작 ?�하?�거 같다. 
