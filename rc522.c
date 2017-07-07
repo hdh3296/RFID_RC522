@@ -352,10 +352,7 @@ byte AddicoreRFID_Read(byte blockAddr, byte *recvData)
     {
         status = MI_ERR;
     }
-	else if (status == MI_OK)
-	{
-		status == MI_OK;
-	}
+
     
     return status;
 }

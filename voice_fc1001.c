@@ -1466,14 +1466,25 @@ void  Serial2Check(void)
 
 unsigned char myData[16] = {0,};
 volatile int mytest_cnt=0;
-
 volatile uchar checksum1;
+
+byte blockAddr      = 4;
+byte dataBlock[]    = {
+    0x01, 0x02, 0x03, 0x04, //  1,  2,   3,  4,
+    0x05, 0x06, 0x07, 0x08, //  5,  6,   7,  8,
+    0x08, 0x09, 0xff, 0x0b, //  9, 10, 255, 12,
+    0x0c, 0x0d, 0x0e, 0x0f  // 13, 14,  15, 16
+};
+byte buffer[18] = {0,};
+
+	
+
 void    TestVoicePlay(void)
 {
     unsigned bBusy;
 	uchar status;	
 
-    _VOICE_ACT = VOICE_OFF; // 리�? ?�이 : RFID ?�상 ?�작 
+    _VOICE_ACT = VOICE_OFF; // RFID 리셋 관련 
 
 	AddicoreRFID_Init();
 
@@ -1494,9 +1505,9 @@ void    TestVoicePlay(void)
 			}
 		}
 
-		// RFID ?�그???�??�� 리�?
-		status = AddicoreRFID_Request(PICC_REQIDL, str);    
-		if (status == MI_OK)    // MIFARE 카드?�때�??�동
+
+		status = AddicoreRFID_Request(PICC_REQIDL, str);	
+		if (status == MI_OK)	// MIFARE 카드?�때�??�동
 		{
 			//mytest = str[0];
 			//mytest1 = str[1];
@@ -1521,6 +1532,12 @@ void    TestVoicePlay(void)
     	}
 
 
+		AddicoreRFID_Read(blockAddr, buffer);
+		if (status == MI_OK)      // MIFARE 카드?�때�??�동
+    	{
+			mytest_cnt++;
+			DelayMs(1000);	
+    	}
 
 		AddicoreRFID_Halt();  // ?�작 중�? ?��??건데 ?�작 ?�하?�거 같다. 
     }
@@ -1544,7 +1561,7 @@ void    PortInit(void)
     TRISD6 = 1;
     TRISD5 = 1;
     TRISD4 = 1;
-    TRISD3 = 1;
+	TRISD3 = 1;
     TRISD2 = 1;
     TRISD1 = 1;
     TRISD0 = 1;
