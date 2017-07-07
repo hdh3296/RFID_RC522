@@ -542,7 +542,7 @@ byte PCD_TransceiveData(	byte *sendData,		///< Pointer to the data to transfer t
 													byte *validBits,	///< In/Out: The number of valid bits in the last byte. 0 for 8 valid bits. Default nullptr.
 													byte rxAlign,		///< In: Defines the bit position in backData[0] for the first bit received. Default 0.
 													byte checkCRC		///< In: True => The last two bytes of the response is assumed to be a CRC_A that must be validated. Default false
-								 ) {
+								 ) {	// byte *validBits = nullptr, byte rxAlign = 0, bool checkCRC = false);
 	byte waitIRq = 0x30;		// RxIRq and IdleIRq
 	return PCD_CommunicateWithPICC(PCD_Transceive, waitIRq, sendData, sendLen, backData, backLen, validBits, 
 													rxAlign, checkCRC);
@@ -947,5 +947,281 @@ byte PICC_Select(	Uid *uid,			///< Pointer to Uid struct. Normally output, but c
 	return STATUS_OK;
 }
 
+
+
+/**
+ * Dumps debug info about the selected PICC to Serial.
+ * On success the PICC is halted after dumping the data.
+ * For MIFARE Classic the factory default key of 0xFFFFFFFFFFFF is tried.  
+ *
+ * @DEPRECATED Kept for bakward compatibility
+ */
+void PICC_DumpToSerial(Uid *uid	///< Pointer to Uid struct returned from a successful PICC_Select().
+								) {
+	MIFARE_Key key;
+	byte piccType;
+	byte i;
+	
+	// Dump UID, SAK and Type
+	PICC_DumpDetailsToSerial(uid);
+	
+	// Dump contents
+	piccType = PICC_GetType(uid->sak);
+	switch (piccType) {
+		case PICC_TYPE_MIFARE_MINI:
+		case PICC_TYPE_MIFARE_1K:
+		case PICC_TYPE_MIFARE_4K:
+			// All keys are set to FFFFFFFFFFFFh at chip delivery from the factory.
+			for (i = 0; i < 6; i++) {
+				key.keyByte[i] = 0xFF;
+			}
+			PICC_DumpMifareClassicToSerial(uid, piccType, &key);
+			break;
+			
+		case PICC_TYPE_MIFARE_UL:
+			PICC_DumpMifareUltralightToSerial();
+			break;
+			
+		case PICC_TYPE_ISO_14443_4:
+		case PICC_TYPE_MIFARE_DESFIRE:
+		case PICC_TYPE_ISO_18092:
+		case PICC_TYPE_MIFARE_PLUS:
+		case PICC_TYPE_TNP3XXX:
+			Serial_println(
+			//"Dumping memory contents not implemented for that PICC type."
+			);
+			break;
+			
+		case PICC_TYPE_UNKNOWN:
+		case PICC_TYPE_NOT_COMPLETE:
+		default:
+			break; // No memory dump here
+	}
+	
+	Serial_println();
+	PICC_HaltA(); // Already done if it was a MIFARE Classic PICC.
+}
+
+
+
+/**
+ * Dumps card info (UID,SAK,Type) about the selected PICC to Serial.
+ *
+ * @DEPRECATED kept for backward compatibility
+ */
+void PICC_DumpDetailsToSerial(Uid *uid	///< Pointer to Uid struct returned from a successful PICC_Select().
+									) {
+	byte i;									
+	// UID
+	Serial_print(//"Card UID:"
+					);
+	for (i = 0; i < uid->size; i++) {
+		if(uid->uidByte[i] < 0x10)
+			Serial_print(//" 0"
+							);
+		else
+			Serial_print(//" "
+						);
+		Serial_print(//uid->uidByte[i]
+							//, HEX
+							);
+	} 
+	Serial_println();
+	
+	// SAK
+	Serial_print(//"Card SAK: "
+					);
+	if(uid->sak < 0x10)
+		Serial_print(//"0"
+						);
+	Serial_println(//uid->sak
+					//, HEX
+					);
+	
+	// (suggested) PICC type
+	PICC_Type piccType = PICC_GetType(uid->sak);
+	Serial_print(//"PICC type: "
+					);
+//	Serial_println(PICC_GetTypeName(piccType));
+} // End PICC_DumpDetailsToSerial()
+
+
+
+/**
+ * Translates the SAK (Select Acknowledge) to a PICC type.
+ * 
+ * @return PICC_Type
+ */
+byte PICC_GetType(byte sak		///< The SAK byte returned from PICC_Select().
+							) {
+	// http://www.nxp.com/documents/application_note/AN10833.pdf 
+	// 3.2 Coding of Select Acknowledge (SAK)
+	// ignore 8-bit (iso14443 starts with LSBit = bit 1)
+	// fixes wrong type for manufacturer Infineon (http://nfc-tools.org/index.php?title=ISO14443A)
+	sak &= 0x7F;
+	switch (sak) {
+		case 0x04:	return PICC_TYPE_NOT_COMPLETE;	// UID not complete
+		case 0x09:	return PICC_TYPE_MIFARE_MINI;
+		case 0x08:	return PICC_TYPE_MIFARE_1K;
+		case 0x18:	return PICC_TYPE_MIFARE_4K;
+		case 0x00:	return PICC_TYPE_MIFARE_UL;
+		case 0x10:
+		case 0x11:	return PICC_TYPE_MIFARE_PLUS;
+		case 0x01:	return PICC_TYPE_TNP3XXX;
+		case 0x20:	return PICC_TYPE_ISO_14443_4;
+		case 0x40:	return PICC_TYPE_ISO_18092;
+		default:	return PICC_TYPE_UNKNOWN;
+	}
+} // End PICC_GetType()
+
+
+/**
+ * Dumps memory contents of a MIFARE Classic PICC.
+ * On success the PICC is halted after dumping the data.
+ */
+void PICC_DumpMifareClassicToSerial(	Uid *uid,			///< Pointer to Uid struct returned from a successful PICC_Select().
+												PICC_Type piccType,	///< One of the PICC_Type enums.
+												MIFARE_Key *key		///< Key A used for all sectors.
+											) {
+	byte no_of_sectors = 0;
+	int i;
+	
+	switch (piccType) {
+		case PICC_TYPE_MIFARE_MINI:
+			// Has 5 sectors * 4 blocks/sector * 16 bytes/block = 320 bytes.
+			no_of_sectors = 5;
+			break;
+			
+		case PICC_TYPE_MIFARE_1K:
+			// Has 16 sectors * 4 blocks/sector * 16 bytes/block = 1024 bytes.
+			no_of_sectors = 16;
+			break;
+			
+		case PICC_TYPE_MIFARE_4K:
+			// Has (32 sectors * 4 blocks/sector + 8 sectors * 16 blocks/sector) * 16 bytes/block = 4096 bytes.
+			no_of_sectors = 40;
+			break;
+			
+		default: // Should not happen. Ignore.
+			break;
+	}
+	
+	// Dump sectors, highest address first.
+	if (no_of_sectors) {
+		Serial_println(//"Sector Block   0  1  2  3   4  5  6  7   8  9 10 11  12 13 14 15  AccessBits"
+						);
+		for (i = no_of_sectors - 1; i >= 0; i--) {
+//			PICC_DumpMifareClassicSectorToSerial(uid, key, i);
+		}
+	}
+	PICC_HaltA(); // Halt the PICC before stopping the encrypted session.
+//	PCD_StopCrypto1();
+} // End PICC_DumpMifareClassicToSerial()
+
+
+/**
+ * Dumps memory contents of a MIFARE Ultralight PICC.
+ */
+void PICC_DumpMifareUltralightToSerial() {
+	byte status;
+	byte byteCount;
+	byte buffer[18];
+	byte i;
+	
+	Serial_println(//"Page  0  1  2  3"
+					);
+	// Try the mpages of the original Ultralight. Ultralight C has more pages.
+	for (byte page = 0; page < 16; page +=4) { // Read returns data for 4 pages at a time.
+		// Read pages
+        byteCount = 18; // byteCount = sizeof(buffer);
+//		status = MIFARE_Read(page, buffer, &byteCount);
+		if (status != STATUS_OK) {
+			Serial_print(//"MIFARE_Read() failed: "
+							);
+//			Serial_println(GetStatusCodeName(status));
+			break;
+		}
+		// Dump data
+		for (byte offset = 0; offset < 4; offset++) {
+			i = page + offset;
+			if(i < 10)
+				Serial_print(//"  "
+								); // Pad with spaces
+			else
+				Serial_print(//" "
+								); // Pad with spaces
+			Serial_print(//i
+							);
+			Serial_print(//"  "
+							);
+			for (byte index = 0; index < 4; index++) {
+				i = 4 * offset + index;
+				if(buffer[i] < 0x10)
+					Serial_print(//" 0"
+									);
+				else
+					Serial_print(//" "
+									);
+				Serial_print(//buffer[i]
+								//, HEX
+								);
+			}
+			Serial_println();
+		}
+	}
+} // End PICC_DumpMifareUltralightToSerial()
+
+
+/**
+ * Instructs a PICC in state ACTIVE(*) to go to state HALT.
+ *
+ * @return STATUS_OK on success, STATUS_??? otherwise.
+ */ 
+byte PICC_HaltA() {
+	byte result;
+	byte buffer[4];
+	
+	// Build command buffer
+	buffer[0] = PICC_CMD_HLTA;
+	buffer[1] = 0;
+	// Calculate CRC_A
+	result = PCD_CalculateCRC(buffer, 2, &buffer[2]);
+	if (result != STATUS_OK) {
+		return result;
+	}
+	
+	// Send the command.
+	// The standard says:
+	//		If the PICC responds with any modulation during a period of 1 ms after the end of the frame containing the
+	//		HLTA command, this response shall be interpreted as 'not acknowledge'.
+	// We interpret that this way: Only STATUS_TIMEOUT is a success.
+	result = PCD_TransceiveData(buffer, sizeof(buffer), nullptr, 0, 0, 0, 0);
+	if (result == STATUS_TIMEOUT) {
+		return STATUS_OK;
+	}
+	if (result == STATUS_OK) { // That is ironically NOT ok in this case ;-)
+		return STATUS_ERROR;
+	}
+	return result;
+} // End PICC_HaltA()
+
+void Serial_print()
+{
+	byte a;
+	a = 1;
+}
+
+void Serial_printl()
+{
+	byte a;
+	a = 1;
+}
+
+void Serial_println()
+{
+	byte a;
+	a = 1;
+
+}
 
 #endif	

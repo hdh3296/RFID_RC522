@@ -1531,9 +1531,9 @@ void    TestVoicePlay(void)
 
 
 
+		// Dump debug info about the card; PICC_HaltA() is automatically called
+		PICC_DumpToSerial(&uid);
 
-
-		AddicoreRFID_Halt();  // ?�작 중�? ?��??건데 ?�작 ?�하?�거 같다. 
     }
 
 }

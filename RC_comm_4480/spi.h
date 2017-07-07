@@ -1,5 +1,5 @@
 
-#define		byte	char
+#define		byte	unsigned char
 
 
 extern	void InitSPI(void);

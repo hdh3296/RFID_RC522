@@ -3,7 +3,8 @@
 
 #define    	uchar   unsigned char
 #define    	uint    unsigned int
-#define		byte	char
+#define		byte	unsigned char
+#define		nullptr		0
 
 ////////////////////////////////////////////////////////////////
 // AddicoreRFID Registers                   
@@ -201,6 +202,39 @@ typedef struct {
 Uid uid;	// Used by PICC_ReadCardSerial().
 
 
+// MIFARE constants that does not fit anywhere else
+typedef enum  {
+	MF_ACK					= 0xA,		// The MIFARE Classic uses a 4 bit ACK/NAK. Any other value than 0xA is NAK.
+	MF_KEY_SIZE 			= 6 		// A Mifare Crypto1 key is 6 bytes.
+} MIFARE_Misc;
+
+
+// A struct used for passing a MIFARE Crypto1 key
+typedef struct {
+	byte		keyByte[MF_KEY_SIZE];
+} MIFARE_Key;
+
+
+// PICC types we can detect. Remember to update PICC_GetTypeName() if you add more.
+// last value set to 0xff, then compiler uses less ram, it seems some optimisations are triggered
+typedef enum  {
+	PICC_TYPE_UNKNOWN		,
+	PICC_TYPE_ISO_14443_4	,	// PICC compliant with ISO/IEC 14443-4 
+	PICC_TYPE_ISO_18092 	,	// PICC compliant with ISO/IEC 18092 (NFC)
+	PICC_TYPE_MIFARE_MINI	,	// MIFARE Classic protocol, 320 bytes
+	PICC_TYPE_MIFARE_1K 	,	// MIFARE Classic protocol, 1KB
+	PICC_TYPE_MIFARE_4K 	,	// MIFARE Classic protocol, 4KB
+	PICC_TYPE_MIFARE_UL 	,	// MIFARE Ultralight or Ultralight C
+	PICC_TYPE_MIFARE_PLUS	,	// MIFARE Plus
+	PICC_TYPE_MIFARE_DESFIRE,	// MIFARE DESFire
+	PICC_TYPE_TNP3XXX		,	// Only mentioned in NXP AN 10833 MIFARE Type Identification Procedure
+	PICC_TYPE_NOT_COMPLETE	= 0xff	// SAK indicates UID is not complete.
+} PICC_Type;
+
+
+
+
+
 uint _RxBits;		  // The number of received data bits
 
 byte AddicoreRFID_Request(byte reqMode, byte *TagType);
@@ -264,5 +298,27 @@ byte PICC_ReadCardSerial(void);
 byte PICC_Select(	Uid *uid,			///< Pointer to Uid struct. Normally output, but can also be used to supply a known UID.
 						byte validBits		///< The number of known UID bits supplied in *uid. Normally 0. If set you must also supply uid->size.
 						);
+
+void PICC_DumpToSerial(Uid *uid	///< Pointer to Uid struct returned from a successful PICC_Select().
+								);
+
+void PICC_DumpDetailsToSerial(Uid *uid	///< Pointer to Uid struct returned from a successful PICC_Select().
+									);
+byte PICC_GetType(byte sak		///< The SAK byte returned from PICC_Select().
+							);
+
+void PICC_DumpMifareClassicToSerial(	Uid *uid,			///< Pointer to Uid struct returned from a successful PICC_Select().
+												PICC_Type piccType,	///< One of the PICC_Type enums.
+												MIFARE_Key *key		///< Key A used for all sectors.
+											);
+
+void PICC_DumpMifareUltralightToSerial();
+byte PICC_HaltA();
+void Serial_print();
+void Serial_printl();
+void Serial_println();
+
+
+
 
 
