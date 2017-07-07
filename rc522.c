@@ -469,7 +469,7 @@ byte PICC_IsNewCardPresent(void)
 	// Reset ModWidthReg
 	PCD_WriteRegister(ModWidthReg, 0x26);
 
-	result = PICC_RequestA(bufferATQA, bufferSize);
+	result = PICC_RequestA(bufferATQA, &bufferSize);
 	bbb = result;
 	
 	return (result == STATUS_OK || result == STATUS_COLLISION);
@@ -482,7 +482,7 @@ byte PICC_IsNewCardPresent(void)
  * @return STATUS_OK on success, STATUS_??? otherwise.
  */
 byte PICC_RequestA(	byte *bufferATQA,	///< The buffer to store the ATQA (Answer to request) in
-											byte bufferSize	///< Buffer size, at least two bytes. Also number of bytes returned if STATUS_OK.
+											byte *bufferSize	///< Buffer size, at least two bytes. Also number of bytes returned if STATUS_OK.
 										) {
 	return PICC_REQA_or_WUPA(PICC_CMD_REQA, bufferATQA, bufferSize);
 } // End PICC_RequestA()
@@ -496,12 +496,12 @@ byte PICC_RequestA(	byte *bufferATQA,	///< The buffer to store the ATQA (Answer 
  */ 
 byte PICC_REQA_or_WUPA(	byte command, 		///< The command to send - PICC_CMD_REQA or PICC_CMD_WUPA
 												byte *bufferATQA,	///< The buffer to store the ATQA (Answer to request) in
-												byte bufferSize	///< Buffer size, at least two bytes. Also number of bytes returned if STATUS_OK.
+												byte *bufferSize	///< Buffer size, at least two bytes. Also number of bytes returned if STATUS_OK.
 											) {
 	byte validBits;
 	byte status;
 	
-	if (bufferSize < 2) {	// The ATQA response is 2 bytes long.
+	if (*bufferSize < 2) {	// The ATQA response is 2 bytes long.
 		return STATUS_NO_ROOM;
 	}
 	PCD_ClearRegisterBitMask(CollReg, 0x80);		// ValuesAfterColl=1 => Bits received after collision are cleared.
@@ -510,7 +510,7 @@ byte PICC_REQA_or_WUPA(	byte command, 		///< The command to send - PICC_CMD_REQA
 	if (status != STATUS_OK) {
 		return status;
 	}
-	if (bufferSize != 2 || validBits != 0) {		// ATQA must be exactly 16 bits.
+	if (*bufferSize != 2 || validBits != 0) {		// ATQA must be exactly 16 bits.
 		return STATUS_ERROR;
 	}
 	return STATUS_OK;
@@ -538,7 +538,7 @@ void PCD_ClearRegisterBitMask(	unsigned char reg,	///< The register to update. O
 byte PCD_TransceiveData(	byte *sendData,		///< Pointer to the data to transfer to the FIFO.
 													byte sendLen,		///< Number of bytes to transfer to the FIFO.
 													byte *backData,		///< nullptr or pointer to buffer if data should be read back after executing the command.
-													byte backLen,		///< In: Max number of bytes to write to *backData. Out: The number of bytes returned.
+													byte *backLen,		///< In: Max number of bytes to write to *backData. Out: The number of bytes returned.
 													byte *validBits,	///< In/Out: The number of valid bits in the last byte. 0 for 8 valid bits. Default nullptr.
 													byte rxAlign,		///< In: Defines the bit position in backData[0] for the first bit received. Default 0.
 													byte checkCRC		///< In: True => The last two bytes of the response is assumed to be a CRC_A that must be validated. Default false
@@ -560,13 +560,15 @@ byte PCD_CommunicateWithPICC(	byte command,		///< The command to execute. One of
 														byte *sendData,		///< Pointer to the data to transfer to the FIFO.
 														byte sendLen,		///< Number of bytes to transfer to the FIFO.
 														byte *backData,		///< nullptr or pointer to buffer if data should be read back after executing the command.
-														byte backLen,		///< In: Max number of bytes to write to *backData. Out: The number of bytes returned.
+														byte *backLen,		///< In: Max number of bytes to write to *backData. Out: The number of bytes returned.
 														byte *validBits,	///< In/Out: The number of valid bits in the last byte. 0 for 8 valid bits.
 														byte rxAlign,		///< In: Defines the bit position in backData[0] for the first bit received. Default 0.
 														byte checkCRC		///< In: True => The last two bytes of the response is assumed to be a CRC_A that must be validated.
 									 ) {
 	unsigned int i;
 	unsigned char status;
+	byte n;
+	byte controlBuffer[2];
 									 
 	// Prepare values for BitFramingReg
 	byte txLastBits = validBits ? *validBits : 0;
@@ -588,7 +590,7 @@ byte PCD_CommunicateWithPICC(	byte command,		///< The command to execute. One of
 	// TODO check/modify for other architectures than Arduino Uno 16bit
 	
 	for (i = 2000; i > 0; i--) {
-		byte n = PCD_ReadRegister(ComIrqReg);	// ComIrqReg[7..0] bits are: Set1 TxIRq RxIRq IdleIRq HiAlertIRq LoAlertIRq ErrIRq TimerIRq
+		n = PCD_ReadRegister(ComIrqReg);	// ComIrqReg[7..0] bits are: Set1 TxIRq RxIRq IdleIRq HiAlertIRq LoAlertIRq ErrIRq TimerIRq
 		if (n & waitIRq) {					// One of the interrupts that signal success has been set.
 			break;
 		}
@@ -611,11 +613,11 @@ byte PCD_CommunicateWithPICC(	byte command,		///< The command to execute. One of
 	
 	// If the caller wants data back, get it from the MFRC522.
 	if (backData && backLen) {
-		byte n = PCD_ReadRegister(FIFOLevelReg);	// Number of bytes in the FIFO
-		if (n > backLen) {
+		n = PCD_ReadRegister(FIFOLevelReg);	// Number of bytes in the FIFO
+		if (n > *backLen) {
 			return STATUS_NO_ROOM;
 		}
-		backLen = n;											// Number of bytes returned
+		*backLen = n;											// Number of bytes returned
 		PCD_ReadRegister_A(FIFODataReg, n, backData, rxAlign);	// Get received data from FIFO
 		_validBits = PCD_ReadRegister(ControlReg) & 0x07;		// RxLastBits[2:0] indicates the number of valid bits in the last received byte. If this value is 000b, the whole byte is valid.
 		if (validBits) {
@@ -631,20 +633,20 @@ byte PCD_CommunicateWithPICC(	byte command,		///< The command to execute. One of
 	// Perform CRC_A validation if requested.
 	if (backData && backLen && checkCRC) {
 		// In this case a MIFARE Classic NAK is not OK.
-		if (backLen == 1 && _validBits == 4) {
+		if (*backLen == 1 && _validBits == 4) {
 			return STATUS_MIFARE_NACK;
 		}
 		// We need at least the CRC_A value and all 8 bits of the last byte must be received.
-		if (backLen < 2 || _validBits != 0) {
+		if (*backLen < 2 || _validBits != 0) {
 			return STATUS_CRC_WRONG;
 		}
 		// Verify CRC_A - do our own calculation and store the control in controlBuffer.
-		byte controlBuffer[2];
-		status = PCD_CalculateCRC(&backData[0], backLen - 2, &controlBuffer[0]);
+		
+		status = PCD_CalculateCRC(&backData[0], *backLen - 2, &controlBuffer[0]);
 		if (status != STATUS_OK) {
 			return status;
 		}
-		if ((backData[backLen - 2] != controlBuffer[0]) || (backData[backLen - 1] != controlBuffer[1])) {
+		if ((backData[*backLen - 2] != controlBuffer[0]) || (backData[*backLen - 1] != controlBuffer[1])) {
 			return STATUS_CRC_WRONG;
 		}
 	}

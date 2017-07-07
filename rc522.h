@@ -209,12 +209,12 @@ void PCD_Init(void);
 void PCD_AntennaOn(void);
 byte PICC_IsNewCardPresent(void);
 byte PICC_RequestA(	byte *bufferATQA,	///< The buffer to store the ATQA (Answer to request) in
-											byte bufferSize	///< Buffer size, at least two bytes. Also number of bytes returned if STATUS_OK.
+											byte *bufferSize	///< Buffer size, at least two bytes. Also number of bytes returned if STATUS_OK.
 										);
 
 byte PICC_REQA_or_WUPA(	byte command, 		///< The command to send - PICC_CMD_REQA or PICC_CMD_WUPA
 												byte *bufferATQA,	///< The buffer to store the ATQA (Answer to request) in
-												byte bufferSize	///< Buffer size, at least two bytes. Also number of bytes returned if STATUS_OK.
+												byte *bufferSize	///< Buffer size, at least two bytes. Also number of bytes returned if STATUS_OK.
 											);
 
 void PCD_ClearRegisterBitMask(	unsigned char reg,	///< The register to update. One of the PCD_Register enums.
@@ -224,7 +224,7 @@ void PCD_ClearRegisterBitMask(	unsigned char reg,	///< The register to update. O
 byte PCD_TransceiveData(	byte *sendData,		///< Pointer to the data to transfer to the FIFO.
 													byte sendLen,		///< Number of bytes to transfer to the FIFO.
 													byte *backData,		///< nullptr or pointer to buffer if data should be read back after executing the command.
-													byte backLen,		///< In: Max number of bytes to write to *backData. Out: The number of bytes returned.
+													byte *backLen,		///< In: Max number of bytes to write to *backData. Out: The number of bytes returned.
 													byte *validBits,	///< In/Out: The number of valid bits in the last byte. 0 for 8 valid bits. Default nullptr.
 													byte rxAlign,		///< In: Defines the bit position in backData[0] for the first bit received. Default 0.
 													byte checkCRC		///< In: True => The last two bytes of the response is assumed to be a CRC_A that must be validated. Default false
@@ -234,7 +234,7 @@ byte PCD_CommunicateWithPICC(	byte command,		///< The command to execute. One of
 														byte *sendData,		///< Pointer to the data to transfer to the FIFO.
 														byte sendLen,		///< Number of bytes to transfer to the FIFO.
 														byte *backData,		///< nullptr or pointer to buffer if data should be read back after executing the command.
-														byte backLen,		///< In: Max number of bytes to write to *backData. Out: The number of bytes returned.
+														byte *backLen,		///< In: Max number of bytes to write to *backData. Out: The number of bytes returned.
 														byte *validBits,	///< In/Out: The number of valid bits in the last byte. 0 for 8 valid bits.
 														byte rxAlign,		///< In: Defines the bit position in backData[0] for the first bit received. Default 0.
 														byte checkCRC		///< In: True => The last two bytes of the response is assumed to be a CRC_A that must be validated.
