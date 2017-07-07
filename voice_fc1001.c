@@ -1532,7 +1532,7 @@ void    TestVoicePlay(void)
 
 
 		// Dump debug info about the card; PICC_HaltA() is automatically called
-//		PICC_DumpToSerial(&uid);
+		PICC_DumpToSerial(&uid);
 
     }
 

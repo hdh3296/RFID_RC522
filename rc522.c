@@ -569,10 +569,17 @@ byte PCD_CommunicateWithPICC(	byte command,		///< The command to execute. One of
 	unsigned char status;
 	byte n;
 	byte controlBuffer[2];
+	byte txLastBits;
+	byte bitFraming;
+	byte errorRegValue;
+	byte _validBits;
 									 
 	// Prepare values for BitFramingReg
-	byte txLastBits = validBits ? *validBits : 0;
-	byte bitFraming = (rxAlign << 4) + txLastBits;		// RxAlign = BitFramingReg[6..4]. TxLastBits = BitFramingReg[2..0]
+	if (validBits)
+		txLastBits = *validBits;
+	else
+		txLastBits = 0;
+	bitFraming = (rxAlign << 4) + txLastBits;		// RxAlign = BitFramingReg[6..4]. TxLastBits = BitFramingReg[2..0]
 	
 	PCD_WriteRegister(CommandReg, PCD_Idle);			// Stop any active command.
 	PCD_WriteRegister(ComIrqReg, 0x7F);					// Clear all seven interrupt request bits
@@ -604,12 +611,12 @@ byte PCD_CommunicateWithPICC(	byte command,		///< The command to execute. One of
 	}
 	
 	// Stop now if any errors except collisions were detected.
-	byte errorRegValue = PCD_ReadRegister(ErrorReg); // ErrorReg[7..0] bits are: WrErr TempErr reserved BufferOvfl CollErr CRCErr ParityErr ProtocolErr
+	errorRegValue = PCD_ReadRegister(ErrorReg); // ErrorReg[7..0] bits are: WrErr TempErr reserved BufferOvfl CollErr CRCErr ParityErr ProtocolErr
 	if (errorRegValue & 0x13) {	 // BufferOvfl ParityErr ProtocolErr
 		return STATUS_ERROR;
 	}
   
-	byte _validBits = 0;
+	_validBits = 0;
 	
 	// If the caller wants data back, get it from the MFRC522.
 	if (backData && backLen) {
@@ -1115,7 +1122,7 @@ void PICC_DumpMifareClassicToSerial(	Uid *uid,			///< Pointer to Uid struct retu
 		}
 	}
 	PICC_HaltA(); // Halt the PICC before stopping the encrypted session.
-//	PCD_StopCrypto1();
+	PCD_StopCrypto1();
 } // End PICC_DumpMifareClassicToSerial()
 
 
@@ -1469,9 +1476,9 @@ byte PCD_Authenticate(byte command,		///< PICC_CMD_MF_AUTH_KEY_A or PICC_CMD_MF_
  * @return STATUS_OK on success, STATUS_??? otherwise.
  */
 byte MIFARE_Read(	byte blockAddr, 	///< MIFARE Classic: The block (0-0xff) number. MIFARE Ultralight: The first page to return data from.
-											byte *buffer,		///< The buffer to store the data in
-											byte *bufferSize	///< Buffer size, at least 18 bytes. Also number of bytes returned if STATUS_OK.
-										) {
+						byte *buffer,		///< The buffer to store the data in
+						byte *bufferSize	///< Buffer size, at least 18 bytes. Also number of bytes returned if STATUS_OK.
+						) {
 	byte result;
 	
 	// Sanity check
@@ -1491,6 +1498,17 @@ byte MIFARE_Read(	byte blockAddr, 	///< MIFARE Classic: The block (0-0xff) numbe
 	// Transmit the buffer and receive the response, validate CRC_A.
 	return PCD_TransceiveData(buffer, 4, buffer, bufferSize, nullptr, 0, true);
 }
+
+
+/**
+ * Used to exit the PCD from its authenticated state.
+ * Remember to call this function after communicating with an authenticated PICC - otherwise no new communications can start.
+ */
+void PCD_StopCrypto1() 
+{
+	// Clear MFCrypto1On bit
+	PCD_ClearRegisterBitMask(Status2Reg, 0x08); // Status2Reg[7..0] bits are: TempSensClear I2CForceHS reserved reserved MFCrypto1On ModemState[2:0]
+} // End PCD_StopCrypto1()
 
 
 #endif	

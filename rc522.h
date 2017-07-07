@@ -336,6 +336,7 @@ byte MIFARE_Read(	byte blockAddr, 	///< MIFARE Classic: The block (0-0xff) numbe
 											byte *bufferSize	///< Buffer size, at least 18 bytes. Also number of bytes returned if STATUS_OK.
 										);
 
+void PCD_StopCrypto1();
 
 
 
