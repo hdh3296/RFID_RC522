@@ -1250,7 +1250,7 @@ void PICC_DumpMifareClassicSectorToSerial(Uid *uid,			///< Pointer to Uid struct
 
 	// Dump blocks, highest address first.
 	byte byteCount;
-	byte buffer[18];
+	byte buffer[18]; // 한 블럭의 데이타 저장소 
 	byte blockAddr;
 	
 
@@ -1347,7 +1347,7 @@ void PICC_DumpMifareClassicSectorToSerial(Uid *uid,			///< Pointer to Uid struct
 							);
 			continue;
 		}
-		// Dump data
+		// Dump data (실제 데이타 0 ~ 63 블락 데이타 읽는다.)
 		for (index = 0; index < 16; index++) {
 			if(buffer[index] < 0x10)
 				Serial_print(//F(" 0")
