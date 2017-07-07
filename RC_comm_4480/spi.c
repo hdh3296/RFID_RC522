@@ -61,6 +61,33 @@ unsigned char  Read_AddicoreRFID(unsigned char addr)
 
 
 
+/**
+ * Writes a byte to the specified register in the MFRC522 chip.
+ * The interface is described in the datasheet section 8.1.2.
+ */
+unsigned char PCD_WriteRegister(unsigned char reg,	
+										byte value
+										)		
+{
+	CS=0;	
+	WriteSPI((reg<<1)&0x7E);
+	WriteSPI(value);
+	CS=1;
+	return(SSPBUF);
+} // End PCD_WriteRegister()
+
+unsigned char PCD_ReadRegister( unsigned char reg		)		
+{
+	CS=0;
+	WriteSPI(((reg<<1)&0x7E) | 0x80);
+	WriteSPI(0x00);
+	CS=1;
+	return(SSPBUF);
+} 
+
+
+
+
 
 void InitSPI(void)
 {

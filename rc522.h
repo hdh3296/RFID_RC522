@@ -35,6 +35,8 @@
 #define     RxModeReg           0x13  // defines reception data rate and framing
 #define     TxControlReg        0x14  // controls the logical behavior of the antenna driver pins TX1 and TX2
 #define     TxAutoReg           0x15  // controls the setting of the transmission modulation
+#define     TxASKReg			 0x15  
+
 #define     TxSelReg            0x16  // selects the internal sources for the antenna driver
 #define     RxSelReg            0x17  // selects internal receiver settings
 #define     RxThresholdReg      0x18  // selects thresholds for the bit decoder
@@ -125,6 +127,10 @@
 #define MAX_LEN 16
 
 
+#define false	0
+#define true	1
+
+
 uint _RxBits;		  // The number of received data bits
 
 byte AddicoreRFID_Request(byte reqMode, byte *TagType);
@@ -139,6 +145,9 @@ extern void CalulateCRC(byte *pIndata, byte len, byte *pOutData);
 extern void AddicoreRFID_Halt(void);
 byte AddicoreRFID_Write(byte blockAddr, byte *_writeData);
 byte AddicoreRFID_Read(byte blockAddr, byte *recvData);
+
+void PCD_Init(void);
+void PCD_AntennaOn(void);
 
 
 

@@ -1,4 +1,7 @@
 
+#define		byte	char
+
+
 extern	void InitSPI(void);
 /*
 extern	void WriteSPI(unsigned char i);
@@ -14,6 +17,8 @@ unsigned char  SPI_Stop_Play(void);
 unsigned char  SPI_Play_Status_Chk(void);
 unsigned char  Write_AddicoreRFID(unsigned char addr,unsigned char thisdata);
 unsigned char  Read_AddicoreRFID(unsigned char addr);
+unsigned char PCD_WriteRegister(unsigned char reg, byte value);
+unsigned char PCD_ReadRegister( unsigned char reg);
 
 
 

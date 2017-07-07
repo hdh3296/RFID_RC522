@@ -1486,7 +1486,7 @@ void    TestVoicePlay(void)
 
     _VOICE_ACT = VOICE_OFF; // RFID 리셋 관련 
 
-	AddicoreRFID_Init();
+	PCD_Init();
 
     for (;1;)
     {
@@ -1531,13 +1531,6 @@ void    TestVoicePlay(void)
 			DelayMs(1000);			
     	}
 
-
-		AddicoreRFID_Read(blockAddr, buffer);
-		if (status == MI_OK)      // MIFARE 카드?�때�??�동
-    	{
-			mytest_cnt++;
-			DelayMs(1000);	
-    	}
 
 		AddicoreRFID_Halt();  // ?�작 중�? ?��??건데 ?�작 ?�하?�거 같다. 
     }
