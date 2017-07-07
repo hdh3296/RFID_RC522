@@ -1,10 +1,15 @@
 
 
+typedef 	unsigned long 	ULONG;
 
 #define    	uchar   unsigned char
 #define    	uint    unsigned int
 #define		byte	unsigned char
 #define		nullptr		0
+#define		int8_t	int
+#define		int32_t unsigned long
+#define		bool	static bit
+
 
 ////////////////////////////////////////////////////////////////
 // AddicoreRFID Registers                   
@@ -317,6 +322,19 @@ byte PICC_HaltA();
 void Serial_print();
 void Serial_printl();
 void Serial_println();
+void PICC_DumpMifareClassicSectorToSerial(Uid *uid,			///< Pointer to Uid struct returned from a successful PICC_Select().
+													MIFARE_Key *key,	///< Key A for the sector.
+													byte sector			///< The sector to dump, 0..39.
+													);
+byte PCD_Authenticate(byte command,		///< PICC_CMD_MF_AUTH_KEY_A or PICC_CMD_MF_AUTH_KEY_B
+											byte blockAddr, 	///< The block number. See numbering in the comments in the .h file.
+											MIFARE_Key *key,	///< Pointer to the Crypteo1 key to use (6 bytes)
+											Uid *uid			///< Pointer to Uid struct. The first 4 bytes of the UID is used.
+											);
+byte MIFARE_Read(	byte blockAddr, 	///< MIFARE Classic: The block (0-0xff) number. MIFARE Ultralight: The first page to return data from.
+											byte *buffer,		///< The buffer to store the data in
+											byte *bufferSize	///< Buffer size, at least 18 bytes. Also number of bytes returned if STATUS_OK.
+										);
 
 
 
