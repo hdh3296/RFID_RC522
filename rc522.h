@@ -237,7 +237,7 @@ typedef enum  {
 } PICC_Type;
 
 
-
+MIFARE_Key key;
 
 
 uint _RxBits;		  // The number of received data bits
@@ -337,6 +337,7 @@ byte MIFARE_Read(	byte blockAddr, 	///< MIFARE Classic: The block (0-0xff) numbe
 										);
 
 void PCD_StopCrypto1();
+byte RFID_Proc();
 
 
 
