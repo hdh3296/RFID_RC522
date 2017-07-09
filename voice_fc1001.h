@@ -10,8 +10,8 @@
 #define	 	LED3	LATC2
 
 
-
-unsigned char 	str[MAX_LEN];
+#define		RFID_TX_LEN		17
+unsigned char 	RFIDTxBuf[RFID_TX_LEN];
 
 
 

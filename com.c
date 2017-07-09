@@ -76,22 +76,21 @@ void    Com1TxStartStr(void)
 
    	Com1RxStatus = TX_SET;  
 	nCom1TxStrIndex = 0;
-    TXREG = str[nCom1TxStrIndex];
+    TXREG = RFIDTxBuf[nCom1TxStrIndex];
 	nCom1TxStrIndex++;
 	TXIE = 1;
 
 	LED2 = !LED2;
 }
 
-
 void Com1TxNextStr(void)
 {	
 	
-	TXREG = str[nCom1TxStrIndex];
+	TXREG = RFIDTxBuf[nCom1TxStrIndex];
 	nCom1TxStrIndex++;
 	Com1TxTimer=0;
 		
-	if(nCom1TxStrIndex >= (MAX_LEN-1))
+	if(nCom1TxStrIndex >= RFID_TX_LEN)
 	{	
 		TXIE=0;
 	}

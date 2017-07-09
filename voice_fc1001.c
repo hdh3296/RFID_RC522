@@ -1493,7 +1493,7 @@ void    TestVoicePlay(void)
     for (;1;)
     {
         CLRWDT();
-
+/*
 		Serial2Check();
 
 		if(Com1RxStatus == TX_SET){
@@ -1506,7 +1506,7 @@ void    TestVoicePlay(void)
 				TX_EN=0;
 			}
 		}
-
+*/
 		/*
 		// Look for new cards
 		if ( ! PICC_IsNewCardPresent()) {
@@ -1515,7 +1515,7 @@ void    TestVoicePlay(void)
 		*/
 		aaa = PICC_IsNewCardPresent();
 		if (aaa) {
-			DelayUs(100);
+			DelayUs(1);
 		}
 
 		/*
@@ -1526,14 +1526,14 @@ void    TestVoicePlay(void)
 		*/
 		ccc = PICC_ReadCardSerial();
 		if (ccc) {
-			DelayUs(100);
+			DelayUs(1);
 		}
 
 
 
 		// Dump debug info about the card; PICC_HaltA() is automatically called
 		PICC_DumpToSerial(&uid);
-        DelayUs(100);
+        DelayUs(1);
 
     }
 

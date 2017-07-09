@@ -2,9 +2,12 @@
 #ifndef __RC522_H_
 #define	__RC522_H_
 
+#include    <pic18.h>
+
 #include "RC_comm_4480\spi.h"
 #include "rc522.h"
-
+#include "com.h"
+#include "voice_fc1001.h"
 
 /*
  * Function Name: AntennaOn
@@ -272,7 +275,7 @@ byte AddicoreRFID_Anticoll(byte *serNum)
 
     //SetBitMask(CollReg, 0x80);		//ValuesAfterColl=1
 
-	//memcpy(serNum, str, 5);
+	//memcpy(serNum, RFIDTxBuf, 5);
     return status;
 } 
 
@@ -1112,7 +1115,7 @@ void PICC_DumpMifareClassicToSerial(	Uid *uid,			///< Pointer to Uid struct retu
 		default: // Should not happen. Ignore.
 			break;
 	}
-	
+	CLRWDT();
 	// Dump sectors, highest address first.
 	if (no_of_sectors) {
 		Serial_println(//"Sector Block   0  1  2  3   4  5  6  7   8  9 10 11  12 13 14 15  AccessBits"
@@ -1121,6 +1124,7 @@ void PICC_DumpMifareClassicToSerial(	Uid *uid,			///< Pointer to Uid struct retu
 			PICC_DumpMifareClassicSectorToSerial(uid, key, i);
 		}
 	}
+	CLRWDT();
 	PICC_HaltA(); // Halt the PICC before stopping the encrypted session.
 	PCD_StopCrypto1();
 } // End PICC_DumpMifareClassicToSerial()
@@ -1272,6 +1276,7 @@ void PICC_DumpMifareClassicSectorToSerial(Uid *uid,			///< Pointer to Uid struct
 
 	int8_t blockOffset;
 	byte index;
+	byte j;
 
 
 	isSectorTrailer = true;
@@ -1356,12 +1361,25 @@ void PICC_DumpMifareClassicSectorToSerial(Uid *uid,			///< Pointer to Uid struct
 				Serial_print(//F(" ")
 								);
 			Serial_print(//buffer[index], HEX
-								);
+							);
+
+			
+								
 			if ((index % 4) == 3) {
 				Serial_print(//F(" ")
 								);
 			}
 		}
+
+		RFIDTxBuf[0] = blockAddr;
+		if (RFIDTxBuf[0] == 4){
+			for (j=1; j<RFID_TX_LEN; j++) {
+				RFIDTxBuf[j] = buffer[j-1];
+			}
+			Com1TxStartStr();
+		}
+				
+		
 		// Parse sector trailer data
 		if (isSectorTrailer) {
 			c1  = buffer[7] >> 4;
@@ -1376,6 +1394,8 @@ void PICC_DumpMifareClassicSectorToSerial(Uid *uid,			///< Pointer to Uid struct
 			g[2] = ((c1 & 4) << 0) | ((c2 & 4) >> 1) | ((c3 & 4) >> 2);
 			g[3] = ((c1 & 8) >> 1) | ((c2 & 8) >> 2) | ((c3 & 8) >> 3);
 			isSectorTrailer = false;
+
+			
 		}
 		
 		// Which access group is this block in?
