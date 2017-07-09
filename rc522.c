@@ -1115,7 +1115,7 @@ void PICC_DumpMifareClassicToSerial(	Uid *uid,			///< Pointer to Uid struct retu
 		default: // Should not happen. Ignore.
 			break;
 	}
-	CLRWDT();
+	
 	// Dump sectors, highest address first.
 	if (no_of_sectors) {
 		Serial_println(//"Sector Block   0  1  2  3   4  5  6  7   8  9 10 11  12 13 14 15  AccessBits"
@@ -1124,7 +1124,7 @@ void PICC_DumpMifareClassicToSerial(	Uid *uid,			///< Pointer to Uid struct retu
 			PICC_DumpMifareClassicSectorToSerial(uid, key, i);
 		}
 	}
-	CLRWDT();
+	
 	PICC_HaltA(); // Halt the PICC before stopping the encrypted session.
 	PCD_StopCrypto1();
 } // End PICC_DumpMifareClassicToSerial()

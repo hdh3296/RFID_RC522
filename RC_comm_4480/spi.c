@@ -10,6 +10,8 @@ void WriteSPI(unsigned char i)
 {
 	unsigned char zzz;
 
+	CLRWDT();
+
     SSPBUF = i;              
 	
 	zzz=0;
