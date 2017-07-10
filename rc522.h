@@ -1,4 +1,6 @@
 
+#define		RFID_FLR_VALUE		10;
+
 
 typedef 	unsigned long 	ULONG;
 

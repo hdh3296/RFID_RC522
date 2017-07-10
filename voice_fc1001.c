@@ -437,18 +437,13 @@ void main(void)
 
     InitVoice();
 
-	
     //SetDipSW();
 
 	TXIE=0;
 	RCIE=1;
 	Com1RxStatus=STX_CHK; 
 
-
-
 	TestVoicePlay();
-
-
 
     while (1)
     {
