@@ -8,6 +8,7 @@
 #include "rc522.h"
 #include "com.h"
 #include "voice_fc1001.h"
+#include "delay.h"
 
 /*
  * Function Name: AntennaOn
@@ -1536,7 +1537,7 @@ byte RFID_Proc()
 	byte sector 		= 1;
 	byte blockAddr		= 4;
 	byte dataBlock[]	= {
-		0x01, 0x02, 0x03, 0x04, //	1,	2,	 3,  4,
+		0xee, 0x02, 0x03, 0x04, //	1,	2,	 3,  4,
 		0x05, 0x06, 0x07, 0x08, //	5,	6,	 7,  8,
 		0x08, 0x09, 0xff, 0x0b, //	9, 10, 255, 12,
 		0x0c, 0x0d, 0x0e, 0x0f	// 13, 14,	15, 16
@@ -1547,7 +1548,6 @@ byte RFID_Proc()
 	byte size;
 	unsigned char j;
 
-
 	if ( ! PICC_IsNewCardPresent() ) {
 		return 0;
 	}
@@ -1555,22 +1555,20 @@ byte RFID_Proc()
 	if ( ! PICC_ReadCardSerial() ) {
 		return 0;
 	}
-
+	
 	// Dump debug info about the card; PICC_HaltA() is automatically called
 //	PICC_DumpToSerial(&uid);
 //  DelayUs(1);
 
-// to do ...........
+// read and write
 	// In this sample we use the second sector,
 	// that is: sector #1, covering block #4 up to and including block #7
-
 	size = sizeof(buffer);
 	// Authenticate using key A
 	status = (StatusCode) PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_A, trailerBlock, &key, &(uid));
 	if (status != STATUS_OK) {
 		return 0;
 	}
-
 
 	// Read data from the block
 	status = (StatusCode) MIFARE_Read(blockAddr, buffer, &size);
@@ -1580,19 +1578,135 @@ byte RFID_Proc()
 		for (j=1; j<RFID_TX_LEN; j++) {
 			RFIDTxBuf[j] = buffer[j-1];
 		}
-		Com1TxStartStr();	
+		//Com1TxStartStr();	
 	}
 
-	
+    // Authenticate using key B
+    status = (StatusCode) PCD_Authenticate(PICC_CMD_MF_AUTH_KEY_B, trailerBlock, &key, &(uid));
+    if (status != STATUS_OK) {
+        return 0;
+    }	
+
+    // Write data to the block
+    status = (StatusCode) MIFARE_Write(blockAddr, dataBlock, 16);
+    if (status == STATUS_OK) {
+    }
+
+	// again Read data from the block
+	status = (StatusCode) MIFARE_Read(blockAddr, buffer, &size);
+	if (status == STATUS_OK) {
+		RFIDTxBuf[0] = blockAddr;
+
+		for (j=1; j<RFID_TX_LEN; j++) {
+			RFIDTxBuf[j] = buffer[j-1];
+		}
+		Com1TxStartStr();	
+	}	
 
     // Halt PICC
     PICC_HaltA();
     // Stop encryption on PCD
     PCD_StopCrypto1();
 
+	return 1;
+
 	
 }
 
+/**
+ * Writes 16 bytes to the active PICC.
+ * 
+ * For MIFARE Classic the sector containing the block must be authenticated before calling this function.
+ * 
+ * For MIFARE Ultralight the operation is called "COMPATIBILITY WRITE".
+ * Even though 16 bytes are transferred to the Ultralight PICC, only the least significant 4 bytes (bytes 0 to 3)
+ * are written to the specified address. It is recommended to set the remaining bytes 04h to 0Fh to all logic 0.
+ * * 
+ * @return STATUS_OK on success, STATUS_??? otherwise.
+ */
+byte MIFARE_Write(	byte blockAddr, ///< MIFARE Classic: The block (0-0xff) number. MIFARE Ultralight: The page (2-15) to write to.
+							byte *buffer,	///< The 16 bytes to write to the PICC
+							byte bufferSize	///< Buffer size, must be at least 16 bytes. Exactly 16 bytes are written.
+							) {
+	byte result;
+	byte cmdBuffer[2];
+	
+	
+	// Sanity check
+	if (buffer == nullptr || bufferSize < 16) {
+		return STATUS_INVALID;
+	}
+	
+	// Mifare Classic protocol requires two communications to perform a write.
+	// Step 1: Tell the PICC we want to write to block blockAddr.
+	cmdBuffer[0] = PICC_CMD_MF_WRITE;
+	cmdBuffer[1] = blockAddr;
+	result = PCD_MIFARE_Transceive(cmdBuffer, 2, 0); // Adds CRC_A and checks that the response is MF_ACK.
+	if (result != STATUS_OK) {
+		return result;
+	}
+	
+	// Step 2: Transfer the data
+	result = PCD_MIFARE_Transceive(buffer, bufferSize, 0); // Adds CRC_A and checks that the response is MF_ACK.
+	if (result != STATUS_OK) {
+		return result;
+	}
+	
+	return STATUS_OK;
+} // End MIFARE_Write()
+
+
+/**
+ * Wrapper for MIFARE protocol communication.
+ * Adds CRC_A, executes the Transceive command and checks that the response is MF_ACK or a timeout.
+ * 
+ * @return STATUS_OK on success, STATUS_??? otherwise.
+ */
+byte PCD_MIFARE_Transceive(	byte *sendData,		///< Pointer to the data to transfer to the FIFO. Do NOT include the CRC_A.
+									byte sendLen,		///< Number of bytes in sendData.
+									byte acceptTimeout	///< True => A timeout is also success
+									) {
+	byte result;
+	byte cmdBuffer[18]; // We need room for 16 bytes data and 2 bytes CRC_A.
+	byte waitIRq;		// RxIRq and IdleIRq
+	byte cmdBufferSize;
+	byte validBits;
+	unsigned char i;
+	
+	// Sanity check
+	if (sendData == nullptr || sendLen > 16) {
+		return STATUS_INVALID;
+	}
+	
+	// Copy sendData[] to cmdBuffer[] and add CRC_A
+	for (i=0; i<sendLen; i++)	cmdBuffer[i] = sendData[i];	
+	result = PCD_CalculateCRC(cmdBuffer, sendLen, &cmdBuffer[sendLen]);
+	if (result != STATUS_OK) { 
+		return result;
+	}
+	sendLen += 2;
+	
+	// Transceive the data, store the reply in cmdBuffer[]
+	waitIRq = 0x30;		// RxIRq and IdleIRq
+	cmdBufferSize = sizeof(cmdBuffer);
+	validBits = 0;
+	result = PCD_CommunicateWithPICC(PCD_Transceive, waitIRq, cmdBuffer, sendLen, cmdBuffer, 
+										&cmdBufferSize, &validBits, 0, 0);
+	if (acceptTimeout && result == STATUS_TIMEOUT) {
+		return STATUS_OK;
+	}
+	if (result != STATUS_OK) {
+		return result;
+	}
+	// The PICC must reply with a 4 bit ACK
+	if (cmdBufferSize != 1 || validBits != 4) {
+		return STATUS_ERROR;
+	}
+	if (cmdBuffer[0] != MF_ACK) {
+		return STATUS_MIFARE_NACK;
+	}
+	return STATUS_OK;
+} // End PCD_MIFARE_Transceive()
 
 
 #endif	

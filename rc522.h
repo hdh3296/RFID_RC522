@@ -338,7 +338,14 @@ byte MIFARE_Read(	byte blockAddr, 	///< MIFARE Classic: The block (0-0xff) numbe
 
 void PCD_StopCrypto1();
 byte RFID_Proc();
-
+byte MIFARE_Write(	byte blockAddr, ///< MIFARE Classic: The block (0-0xff) number. MIFARE Ultralight: The page (2-15) to write to.
+							byte *buffer,	///< The 16 bytes to write to the PICC
+							byte bufferSize	///< Buffer size, must be at least 16 bytes. Exactly 16 bytes are written.
+							);
+byte PCD_MIFARE_Transceive(	byte *sendData,		///< Pointer to the data to transfer to the FIFO. Do NOT include the CRC_A.
+									byte sendLen,		///< Number of bytes in sendData.
+									byte acceptTimeout	///< True => A timeout is also success
+									);
 
 
 
